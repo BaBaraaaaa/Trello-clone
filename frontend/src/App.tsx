@@ -1,12 +1,12 @@
 
 import { Outlet } from "react-router-dom";
-import Dashboard from "./layouts/Dashboard";
+import MainLayout from "./layouts/MainLayout";
 
 function App() {
   return (
-    <Dashboard>
+    <MainLayout>
       <Outlet />
-    </Dashboard>
+    </MainLayout>
   );
 }
 
