@@ -150,10 +150,11 @@ const CardDetailDialog: React.FC<CardDetailDialogProps> = ({
         sx: {
           borderRadius: 3,
           maxHeight: '90vh',
-          background: 'rgba(255, 255, 255, 0.95)',
+          bgcolor: 'background.paper',
           backdropFilter: 'blur(20px)',
           boxShadow: '0 24px 60px rgba(0, 0, 0, 0.2)',
-          border: '1px solid rgba(255, 255, 255, 0.3)',
+          border: '1px solid',
+          borderColor: 'divider',
           position: 'relative',
           '&::before': {
             content: '""',
@@ -163,14 +164,16 @@ const CardDetailDialog: React.FC<CardDetailDialogProps> = ({
             right: 0,
             bottom: 0,
             borderRadius: 3,
-            background: 'linear-gradient(135deg, rgba(2, 106, 167, 0.05) 0%, rgba(90, 172, 68, 0.03) 100%)',
+            background: (theme) => theme.palette.mode === 'dark'
+              ? 'linear-gradient(135deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.015) 100%)'
+              : 'linear-gradient(135deg, rgba(2, 106, 167, 0.05) 0%, rgba(90, 172, 68, 0.03) 100%)',
             pointerEvents: 'none',
           },
         }
       }}
       BackdropProps={{
         sx: {
-          backgroundColor: 'rgba(0, 0, 0, 0.6)',
+          backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(0,0,0,0.7)' : 'rgba(0,0,0,0.5)',
           backdropFilter: 'blur(4px)',
         }
       }}
@@ -227,7 +230,7 @@ const CardDetailDialog: React.FC<CardDetailDialogProps> = ({
                   size="small"
                   sx={{
                     backgroundColor: label.color,
-                    color: 'white',
+                    color: (theme) => theme.palette.getContrastText(label.color),
                   }}
                 />
               ))}
@@ -250,7 +253,12 @@ const CardDetailDialog: React.FC<CardDetailDialogProps> = ({
                 <PersonIcon fontSize="small" color="action" />
                 <AvatarGroup max={3} sx={{ '& .MuiAvatar-root': { width: 24, height: 24, fontSize: '0.75rem' } }}>
                   {editedCard.members.map((member) => (
-                    <Avatar key={member.id} src={member.avatar} alt={member.name}>
+                    <Avatar
+                      key={member.id}
+                      src={member.avatar}
+                      alt={member.name}
+                      sx={{ bgcolor: 'primary.main', color: (theme) => theme.palette.getContrastText(theme.palette.primary.main) }}
+                    >
                       {member.initials}
                     </Avatar>
                   ))}

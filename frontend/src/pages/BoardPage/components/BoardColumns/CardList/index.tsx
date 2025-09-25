@@ -3,6 +3,7 @@ import { Box } from '@mui/material';
 import CardItem from '../../CardItem';
 import type { CardItemData } from '../../../../../types';
 
+
 interface CardListProps {
   cards: CardItemData[];
   onCardClick?: (card: CardItemData) => void;
@@ -38,10 +39,10 @@ const CardList: React.FC<CardListProps> = ({
           background: 'transparent',
         },
         '&::-webkit-scrollbar-thumb': {
-          background: 'rgba(0, 0, 0, 0.2)',
+          background: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.24)' : 'rgba(0,0,0,0.2)',
           borderRadius: '3px',
           '&:hover': {
-            background: 'rgba(0, 0, 0, 0.3)',
+            background: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.3)',
           },
         },
       }}

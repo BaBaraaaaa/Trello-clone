@@ -83,13 +83,13 @@ const MemberAvatars: React.FC<MemberAvatarsProps> = ({
         <AvatarGroup
           max={maxVisible}
           sx={{
-            '& .MuiAvatar-root': {
+            '& .MuiAvatar-root': (theme) => ({
               width: 32,
               height: 32,
               fontSize: '0.75rem',
-              border: '2px solid white',
+              border: `2px solid ${theme.palette.background.paper}`,
               cursor: 'pointer',
-            },
+            }),
           }}
           onClick={() => setIsDialogOpen(true)}
         >
@@ -98,7 +98,10 @@ const MemberAvatars: React.FC<MemberAvatarsProps> = ({
               key={member.id}
               src={member.avatar}
               alt={member.name}
-              sx={{ bgcolor: 'primary.main' }}
+              sx={{
+                bgcolor: 'primary.main',
+                color: (theme) => theme.palette.getContrastText(theme.palette.primary.main),
+              }}
               title={`${member.name}${member.role ? ` (${member.role})` : ''}`}
             >
               {member.initials}
@@ -111,14 +114,14 @@ const MemberAvatars: React.FC<MemberAvatarsProps> = ({
             size="small"
             onClick={() => setIsDialogOpen(true)}
             sx={{
-              color: 'white',
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-              border: '2px dashed rgba(255, 255, 255, 0.3)',
+              color: (theme) => theme.palette.mode === 'dark' ? theme.palette.common.white : theme.palette.text.primary,
+              backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)',
+              border: (theme) => `2px dashed ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.2)'}`,
               width: 32,
               height: 32,
               '&:hover': {
-                backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                borderColor: 'rgba(255, 255, 255, 0.5)',
+                backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)',
+                borderColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.35)',
               },
             }}
           >
@@ -180,7 +183,10 @@ const MemberAvatars: React.FC<MemberAvatarsProps> = ({
                   <Avatar
                     src={member.avatar}
                     alt={member.name}
-                    sx={{ bgcolor: 'primary.main' }}
+                    sx={{
+                      bgcolor: 'primary.main',
+                      color: (theme) => theme.palette.getContrastText(theme.palette.primary.main),
+                    }}
                   >
                     {member.initials}
                   </Avatar>

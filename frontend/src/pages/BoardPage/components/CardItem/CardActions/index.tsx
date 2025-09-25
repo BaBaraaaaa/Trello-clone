@@ -99,13 +99,13 @@ const CardActions: React.FC<CardActionsProps> = ({
           size={size}
           onClick={handleMenuOpen}
           sx={{
-            backgroundColor: 'rgba(255, 255, 255, 0.9)',
-            color: 'text.secondary',
+            backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.9)',
+            color: (theme) => theme.palette.mode === 'dark' ? theme.palette.common.white : theme.palette.text.secondary,
             width: size === 'small' ? 24 : 32,
             height: size === 'small' ? 24 : 32,
             '&:hover': {
-              backgroundColor: 'rgba(255, 255, 255, 1)',
-              color: 'text.primary',
+              backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,1)',
+              color: (theme) => theme.palette.mode === 'dark' ? theme.palette.common.white : theme.palette.text.primary,
             },
           }}
         >

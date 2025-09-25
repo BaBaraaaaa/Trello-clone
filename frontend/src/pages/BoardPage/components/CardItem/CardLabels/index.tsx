@@ -37,7 +37,7 @@ const CardLabels: React.FC<CardLabelsProps> = ({
             size={size}
             sx={{
               backgroundColor: label.color,
-              color: 'white',
+              color: (theme) => theme.palette.getContrastText(label.color),
               fontSize: size === 'small' ? '0.6875rem' : '0.75rem',
               height: size === 'small' ? 20 : 24,
               borderRadius: 1,

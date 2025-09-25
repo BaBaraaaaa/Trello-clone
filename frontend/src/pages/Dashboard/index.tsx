@@ -23,7 +23,7 @@ import {
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts";
-import { mockBoards } from "../../mock/board";
+import { useMockDB } from "../../contexts/MockDBContext";
 import { BoardCard, StatCard } from "./components";
 
 // Mock data cho recent activity
@@ -62,7 +62,43 @@ const Dashboard: React.FC = () => {
   const { user } = useAuth();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedBoard, setSelectedBoard] = useState<string | null>(null);
-  const [boards, setBoards] = useState(mockBoards);
+  const { db, getBoardMembers } = useMockDB();
+  const [boards, setBoards] = useState(() => {
+    // Map DB boards to UI boards used by BoardCard
+    return db.boards.map((b) => {
+      const members = getBoardMembers(b.id).map((m) => ({
+        id: m.id,
+        name: m.name,
+        avatar: m.initials,
+      }));
+      // naive progress stats from cards
+      const boardColumns = db.columns
+        .filter((c) => c.boardId === b.id)
+        .map((c) => c.id);
+      const boardCards = db.cards.filter((c) =>
+        boardColumns.includes(c.columnId)
+      );
+      const totalTasks = boardCards.length;
+      const completedTasks = boardCards.filter((c) => c.isCompleted).length;
+      const progress =
+        totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+      return {
+        id: b.id,
+        title: b.title,
+        description: b.description ?? "",
+        background:
+          b.backgroundType === "color" ? b.backgroundValue : b.backgroundValue,
+        isStarred: db.boardMembers.some(
+          (bm) => bm.boardId === b.id && bm.isStarred
+        ),
+        members,
+        progress,
+        totalTasks,
+        completedTasks,
+        lastUpdated: b.updatedAt.toISOString().split("T")[0],
+      };
+    });
+  });
 
   const handleMenuOpen = (
     event: React.MouseEvent<HTMLElement>,
@@ -108,35 +144,35 @@ const Dashboard: React.FC = () => {
   return (
     <Box
       sx={{
-        height: '100%',
-        width: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'hidden',
-        position: 'absolute',
+        height: "100%",
+        width: "100%",
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+        position: "absolute",
         top: 0,
         left: 0,
         right: 0,
         bottom: 0,
-        background: (theme) => 
-          theme.palette.mode === 'dark' 
-            ? 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%)'
-            : 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #cbd5e1 100%)',
+        background: (theme) =>
+          theme.palette.mode === "dark"
+            ? "linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%)"
+            : "linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #cbd5e1 100%)",
       }}
     >
       {/* Header Section - Fixed */}
-      <Box 
-        sx={{ 
-          position: 'sticky',
+      <Box
+        sx={{
+          position: "sticky",
           top: 0,
           zIndex: 10,
-          background: (theme) => 
-            theme.palette.mode === 'dark' 
-              ? 'rgba(15, 23, 42, 0.95)'
-              : 'rgba(248, 250, 252, 0.95)',
-          backdropFilter: 'blur(12px)',
-          borderBottom: '1px solid',
-          borderColor: 'divider',
+          background: (theme) =>
+            theme.palette.mode === "dark"
+              ? "rgba(15, 23, 42, 0.95)"
+              : "rgba(248, 250, 252, 0.95)",
+          backdropFilter: "blur(12px)",
+          borderBottom: "1px solid",
+          borderColor: "divider",
           px: { xs: 2, sm: 3, md: 4 },
           py: { xs: 2, sm: 3 },
         }}
@@ -145,22 +181,22 @@ const Dashboard: React.FC = () => {
           variant="h4"
           fontWeight="bold"
           mb={1}
-          sx={{ 
+          sx={{
             fontSize: { xs: "1.75rem", sm: "2rem", md: "2.125rem" },
-            background: (theme) => 
-              theme.palette.mode === 'dark' 
-                ? 'linear-gradient(135deg, #60a5fa 0%, #34d399 50%, #f472b6 100%)'
-                : 'linear-gradient(135deg, #3b82f6 0%, #10b981 50%, #ec4899 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
+            background: (theme) =>
+              theme.palette.mode === "dark"
+                ? "linear-gradient(135deg, #60a5fa 0%, #34d399 50%, #f472b6 100%)"
+                : "linear-gradient(135deg, #3b82f6 0%, #10b981 50%, #ec4899 100%)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
           }}
         >
           Welcome back, {user?.name}! 👋
         </Typography>
-        <Typography 
-          variant="body1" 
+        <Typography
+          variant="body1"
           sx={{
-            color: 'text.secondary',
+            color: "text.secondary",
             opacity: 0.8,
           }}
         >
@@ -169,17 +205,17 @@ const Dashboard: React.FC = () => {
       </Box>
 
       {/* Content Scrollable Area */}
-      <Box 
+      <Box
         sx={{
           flex: 1,
-          overflow: 'auto',
+          overflow: "auto",
           px: { xs: 2, sm: 3, md: 4 },
           py: { xs: 2, sm: 3 },
-          '&::-webkit-scrollbar': {
-            display: 'none',
+          "&::-webkit-scrollbar": {
+            display: "none",
           },
-          msOverflowStyle: 'none',
-          scrollbarWidth: 'none',
+          msOverflowStyle: "none",
+          scrollbarWidth: "none",
         }}
       >
         {/* Statistics Cards */}
@@ -195,203 +231,207 @@ const Dashboard: React.FC = () => {
             mb: { xs: 3, sm: 4 },
           }}
         >
-        <StatCard
-          title="Active Boards"
-          value={totalBoards}
-          icon={<FolderIcon />}
-          color="primary"
-        />
-        <StatCard
-          title="Total Tasks"
-          value={totalTasks}
-          icon={<AssignmentIcon />}
-          color="secondary"
-        />
-        <StatCard
-          title="Completed"
-          value={completedTasks}
-          icon={<CheckCircleIcon />}
-          color="success"
-        />
-        <StatCard
-          title="Progress"
-          value={`${Math.round(overallProgress)}%`}
-          icon={<TrendingUpIcon />}
-          color="info"
-        />
-      </Box>
+          <StatCard
+            title="Active Boards"
+            value={totalBoards}
+            icon={<FolderIcon />}
+            color="primary"
+          />
+          <StatCard
+            title="Total Tasks"
+            value={totalTasks}
+            icon={<AssignmentIcon />}
+            color="secondary"
+          />
+          <StatCard
+            title="Completed"
+            value={completedTasks}
+            icon={<CheckCircleIcon />}
+            color="success"
+          />
+          <StatCard
+            title="Progress"
+            value={`${Math.round(overallProgress)}%`}
+            icon={<TrendingUpIcon />}
+            color="info"
+          />
+        </Box>
 
-      {/* Main Content Grid */}
-      <Box
-        sx={{
-          display: "grid",
-          gridTemplateColumns: { xs: "1fr", lg: "2fr 1fr" },
-          gap: { xs: 3, sm: 4 },
-          alignItems: "start",
-        }}
-      >
-        {/* Boards Section */}
-        <Box>
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              mb: { xs: 2, sm: 3 },
-              flexWrap: "wrap",
-              gap: 2,
-            }}
-          >
-            <Typography
-              variant="h5"
-              fontWeight="bold"
-              sx={{ fontSize: { xs: "1.25rem", sm: "1.5rem" } }}
-            >
-              Your Boards
-            </Typography>
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={createNewBoard}
+        {/* Main Content Grid */}
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", lg: "2fr 1fr" },
+            gap: { xs: 3, sm: 4 },
+            alignItems: "start",
+          }}
+        >
+          {/* Boards Section */}
+          <Box>
+            <Box
               sx={{
-                borderRadius: 2,
-                fontSize: { xs: "0.875rem", sm: "0.9375rem" },
-                py: { xs: 1, sm: 1.5 },
-                px: { xs: 2, sm: 3 },
-                "&:hover": {
-                  transform: "translateY(-2px)",
-                },
-                transition: "all 0.3s ease",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                mb: { xs: 2, sm: 3 },
+                flexWrap: "wrap",
+                gap: 2,
               }}
             >
-              Create Board
-            </Button>
-          </Box>
-
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: { xs: "1fr", md: "repeat(2, 1fr)" },
-              gap: { xs: 2, sm: 3 },
-            }}
-          >
-            {boards.map((board) => (
-              <BoardCard
-                key={board.id}
-                board={board}
-                onClick={handleBoardClick}
-                onMenuClick={handleMenuOpen}
-              />
-            ))}
-          </Box>
-        </Box>
-
-        {/* Sidebar */}
-        <Box>
-          {/* Recent Activity */}
-          <Card sx={{ mb: 3 }}>
-            <CardContent>
-              <Typography variant="h6" fontWeight="bold" mb={2}>
-                Recent Activity
+              <Typography
+                variant="h5"
+                fontWeight="bold"
+                sx={{ fontSize: { xs: "1.25rem", sm: "1.5rem" } }}
+              >
+                Your Boards
               </Typography>
-              <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                {recentActivities.map((activity, index) => (
-                  <Box key={activity.id}>
-                    <Box
-                      sx={{ display: "flex", alignItems: "flex-start", gap: 2 }}
-                    >
-                      <Avatar
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={createNewBoard}
+                sx={{
+                  borderRadius: 2,
+                  fontSize: { xs: "0.875rem", sm: "0.9375rem" },
+                  py: { xs: 1, sm: 1.5 },
+                  px: { xs: 2, sm: 3 },
+                  "&:hover": {
+                    transform: "translateY(-2px)",
+                  },
+                  transition: "all 0.3s ease",
+                }}
+              >
+                Create Board
+              </Button>
+            </Box>
+
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: { xs: "1fr", md: "repeat(2, 1fr)" },
+                gap: { xs: 2, sm: 3 },
+              }}
+            >
+              {boards.map((board) => (
+                <BoardCard
+                  key={board.id}
+                  board={board}
+                  onClick={handleBoardClick}
+                  onMenuClick={handleMenuOpen}
+                />
+              ))}
+            </Box>
+          </Box>
+
+          {/* Sidebar */}
+          <Box>
+            {/* Recent Activity */}
+            <Card sx={{ mb: 3 }}>
+              <CardContent>
+                <Typography variant="h6" fontWeight="bold" mb={2}>
+                  Recent Activity
+                </Typography>
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                  {recentActivities.map((activity, index) => (
+                    <Box key={activity.id}>
+                      <Box
                         sx={{
-                          width: 32,
-                          height: 32,
-                          fontSize: "0.8rem",
-                          bgcolor: "primary.main",
+                          display: "flex",
+                          alignItems: "flex-start",
+                          gap: 2,
                         }}
                       >
-                        {activity.avatar}
-                      </Avatar>
-                      <Box sx={{ flex: 1 }}>
-                        <Typography variant="body2">
-                          <strong>{activity.user}</strong> {activity.action}{" "}
-                          <em>{activity.item}</em> in{" "}
-                          <strong>{activity.board}</strong>
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {activity.time}
-                        </Typography>
+                        <Avatar
+                          sx={{
+                            width: 32,
+                            height: 32,
+                            fontSize: "0.8rem",
+                            bgcolor: "primary.main",
+                          }}
+                        >
+                          {activity.avatar}
+                        </Avatar>
+                        <Box sx={{ flex: 1 }}>
+                          <Typography variant="body2">
+                            <strong>{activity.user}</strong> {activity.action}{" "}
+                            <em>{activity.item}</em> in{" "}
+                            <strong>{activity.board}</strong>
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {activity.time}
+                          </Typography>
+                        </Box>
                       </Box>
+                      {index < recentActivities.length - 1 && (
+                        <Divider sx={{ my: 2 }} />
+                      )}
                     </Box>
-                    {index < recentActivities.length - 1 && (
-                      <Divider sx={{ my: 2 }} />
-                    )}
-                  </Box>
-                ))}
-              </Box>
-            </CardContent>
-          </Card>
+                  ))}
+                </Box>
+              </CardContent>
+            </Card>
 
-          {/* Quick Actions */}
-          <Card>
-            <CardContent>
-              <Typography variant="h6" fontWeight="bold" mb={2}>
-                Quick Actions
-              </Typography>
-              <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-                <Button
-                  variant="outlined"
-                  startIcon={<AddIcon />}
-                  fullWidth
-                  onClick={createNewBoard}
-                  sx={{ justifyContent: "flex-start" }}
-                >
-                  Create New Board
-                </Button>
-                <Button
-                  variant="outlined"
-                  startIcon={<GroupIcon />}
-                  fullWidth
-                  sx={{ justifyContent: "flex-start" }}
-                >
-                  Invite Team Members
-                </Button>
-                <Button
-                  variant="outlined"
-                  startIcon={<ScheduleIcon />}
-                  fullWidth
-                  sx={{ justifyContent: "flex-start" }}
-                >
-                  View Calendar
-                </Button>
-              </Box>
-            </CardContent>
-          </Card>
+            {/* Quick Actions */}
+            <Card>
+              <CardContent>
+                <Typography variant="h6" fontWeight="bold" mb={2}>
+                  Quick Actions
+                </Typography>
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                  <Button
+                    variant="outlined"
+                    startIcon={<AddIcon />}
+                    fullWidth
+                    onClick={createNewBoard}
+                    sx={{ justifyContent: "flex-start" }}
+                  >
+                    Create New Board
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    startIcon={<GroupIcon />}
+                    fullWidth
+                    sx={{ justifyContent: "flex-start" }}
+                  >
+                    Invite Team Members
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    startIcon={<ScheduleIcon />}
+                    fullWidth
+                    sx={{ justifyContent: "flex-start" }}
+                  >
+                    View Calendar
+                  </Button>
+                </Box>
+              </CardContent>
+            </Card>
+          </Box>
         </Box>
-      </Box>
 
-      {/* Menu for board actions */}
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleMenuClose}
-      >
-        <MenuItem onClick={() => selectedBoard && toggleStar(selectedBoard)}>
-          {boards.find((b) => b.id === selectedBoard)?.isStarred ? (
-            <>
-              <StarBorderIcon sx={{ mr: 1 }} />
-              Remove from Starred
-            </>
-          ) : (
-            <>
-              <StarIcon sx={{ mr: 1 }} />
-              Add to Starred
-            </>
-          )}
-        </MenuItem>
-        <MenuItem onClick={handleMenuClose}>
-          <AssignmentIcon sx={{ mr: 1 }} />
-          Board Settings
-        </MenuItem>
-      </Menu>
+        {/* Menu for board actions */}
+        <Menu
+          anchorEl={anchorEl}
+          open={Boolean(anchorEl)}
+          onClose={handleMenuClose}
+        >
+          <MenuItem onClick={() => selectedBoard && toggleStar(selectedBoard)}>
+            {boards.find((b) => b.id === selectedBoard)?.isStarred ? (
+              <>
+                <StarBorderIcon sx={{ mr: 1 }} />
+                Remove from Starred
+              </>
+            ) : (
+              <>
+                <StarIcon sx={{ mr: 1 }} />
+                Add to Starred
+              </>
+            )}
+          </MenuItem>
+          <MenuItem onClick={handleMenuClose}>
+            <AssignmentIcon sx={{ mr: 1 }} />
+            Board Settings
+          </MenuItem>
+        </Menu>
       </Box>
     </Box>
   );

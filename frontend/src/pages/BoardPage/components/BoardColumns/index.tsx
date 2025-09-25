@@ -27,18 +27,19 @@ const BoardColumns: React.FC<BoardColumnsProps> = ({
         overflow: 'auto',
         alignItems: 'flex-start',
         minHeight: 0, // Allow flex shrinking
+        bgcolor: 'transparent',
         '&::-webkit-scrollbar': {
           height: '8px',
         },
         '&::-webkit-scrollbar-track': {
-          background: 'rgba(255, 255, 255, 0.1)',
+          background: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
           borderRadius: '4px',
         },
         '&::-webkit-scrollbar-thumb': {
-          background: 'rgba(255, 255, 255, 0.3)',
+          background: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.24)' : 'rgba(0,0,0,0.18)',
           borderRadius: '4px',
           '&:hover': {
-            background: 'rgba(255, 255, 255, 0.5)',
+            background: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.28)',
           },
         },
       }}
@@ -63,18 +64,18 @@ const BoardColumns: React.FC<BoardColumnsProps> = ({
             width: '100%',
             minHeight: { xs: 44, sm: 48 },
             justifyContent: 'flex-start',
-            color: 'white',
-            background: 'rgba(255, 255, 255, 0.15)',
-            backdropFilter: 'blur(8px)',
-            border: '1px dashed rgba(255, 255, 255, 0.4)',
+            color: (theme) => theme.palette.text.primary,
+            background: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)',
+            backdropFilter: 'blur(6px)',
+            border: (theme) => `1px dashed ${theme.palette.divider}`,
             borderRadius: 3,
             px: { xs: 1.5, sm: 2 },
             py: { xs: 1.25, sm: 1.5 },
             fontSize: { xs: '0.875rem', sm: '0.9375rem' },
             transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
             '&:hover': {
-              background: 'rgba(255, 255, 255, 0.25)',
-              borderColor: 'rgba(255, 255, 255, 0.6)',
+              background: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)',
+              borderColor: (theme) => theme.palette.text.secondary,
               transform: 'translateY(-2px)',
               boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
             },

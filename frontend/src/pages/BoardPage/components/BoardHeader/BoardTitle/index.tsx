@@ -66,31 +66,38 @@ const BoardTitle: React.FC<BoardTitleProps> = ({
           autoFocus
           variant="standard"
           sx={{
-            '& .MuiInput-input': {
-              color: 'white',
+            '& .MuiInput-input': (theme) => ({
+              color: theme.palette.mode === 'dark' ? theme.palette.common.white : theme.palette.text.primary,
               fontSize: { xs: '1.25rem', sm: '1.5rem' },
               fontWeight: 700,
-              textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
-            },
-            '& .MuiInput-underline:before': {
-              borderBottomColor: 'rgba(255, 255, 255, 0.5)',
-            },
-            '& .MuiInput-underline:after': {
-              borderBottomColor: 'white',
-            },
+              textShadow: theme.palette.mode === 'dark'
+                ? '0 2px 4px rgba(0, 0, 0, 0.3)'
+                : '0 1px 2px rgba(0, 0, 0, 0.15)',
+            }),
+            '& .MuiInput-underline:before': (theme) => ({
+              borderBottomColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.3)',
+            }),
+            '& .MuiInput-underline:after': (theme) => ({
+              borderBottomColor: theme.palette.mode === 'dark' ? theme.palette.common.white : theme.palette.text.primary,
+            }),
           }}
         />
         <IconButton
           size="small"
           onClick={handleSave}
-          sx={{ color: 'white', ml: 0.5 }}
+          sx={{
+            ml: 0.5,
+            color: (theme) => theme.palette.mode === 'dark' ? theme.palette.common.white : theme.palette.text.primary,
+          }}
         >
           <CheckIcon />
         </IconButton>
         <IconButton
           size="small"
           onClick={handleCancel}
-          sx={{ color: 'white' }}
+          sx={{
+            color: (theme) => theme.palette.mode === 'dark' ? theme.palette.common.white : theme.palette.text.primary,
+          }}
         >
           <CloseIcon />
         </IconButton>
@@ -111,12 +118,14 @@ const BoardTitle: React.FC<BoardTitleProps> = ({
       <Typography
         variant="h5"
         sx={{
-          color: 'white',
+          color: (theme) => theme.palette.mode === 'dark' ? theme.palette.common.white : theme.palette.text.primary,
           fontWeight: 700,
           fontSize: { xs: '1.25rem', sm: '1.5rem' },
-          textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
+          textShadow: (theme) => theme.palette.mode === 'dark'
+            ? '0 2px 4px rgba(0, 0, 0, 0.3)'
+            : '0 1px 2px rgba(0, 0, 0, 0.15)',
           '&:hover': editable ? {
-            opacity: 0.8,
+            opacity: 0.9,
           } : {},
         }}
       >
@@ -126,11 +135,11 @@ const BoardTitle: React.FC<BoardTitleProps> = ({
         <IconButton
           size="small"
           sx={{
-            color: 'rgba(255, 255, 255, 0.7)',
-            opacity: 0.6,
+            color: (theme) => theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.6)',
+            opacity: 0.9,
             '&:hover': {
               opacity: 1,
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.06)',
             },
           }}
         >

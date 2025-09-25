@@ -63,11 +63,12 @@ const CardItem: React.FC<CardItemProps> = ({
         mb: 1.5,
         cursor: 'pointer',
         position: 'relative',
-        background: 'rgba(255, 255, 255, 0.95)',
+        bgcolor: 'background.paper',
         borderRadius: 2.5,
         boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
         backdropFilter: 'blur(8px)',
-        border: '1px solid rgba(255, 255, 255, 0.4)',
+        border: '1px solid',
+        borderColor: 'divider',
         opacity: isDragging ? 0.5 : 1,
         transform: isDragging ? 'rotate(5deg)' : 'none',
         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -79,7 +80,9 @@ const CardItem: React.FC<CardItemProps> = ({
           right: 0,
           bottom: 0,
           borderRadius: 2.5,
-          background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%)',
+          background: (theme) => theme.palette.mode === 'dark'
+            ? 'linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.02) 100%)'
+            : 'linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%)',
           pointerEvents: 'none',
           zIndex: 1,
         },
@@ -90,7 +93,7 @@ const CardItem: React.FC<CardItemProps> = ({
         '&:hover': {
           boxShadow: '0 6px 24px rgba(0, 0, 0, 0.12)',
           transform: isDragging ? 'rotate(5deg)' : 'translateY(-2px) scale(1.02)',
-          background: 'rgba(255, 255, 255, 0.98)',
+          bgcolor: 'background.paper',
         },
       }}
       draggable={draggable}
@@ -146,7 +149,11 @@ const CardItem: React.FC<CardItemProps> = ({
                 height: 20,
                 fontSize: '0.65rem',
                 backgroundColor: isOverdue ? 'error.light' : isDueToday ? 'warning.light' : 'action.hover',
-                color: isOverdue || isDueToday ? 'white' : 'text.secondary',
+                color: (theme) => {
+                  if (isOverdue) return theme.palette.getContrastText(theme.palette.error.light);
+                  if (isDueToday) return theme.palette.getContrastText(theme.palette.warning.light);
+                  return theme.palette.text.secondary;
+                },
                 '& .MuiChip-icon': {
                   fontSize: '0.75rem',
                   color: 'inherit',
@@ -183,7 +190,11 @@ const CardItem: React.FC<CardItemProps> = ({
                 height: 20,
                 fontSize: '0.65rem',
                 backgroundColor: card.checklist.completed === card.checklist.total ? 'success.light' : 'action.hover',
-                color: card.checklist.completed === card.checklist.total ? 'white' : 'text.secondary',
+                color: (theme) => (
+                  card.checklist!.completed === card.checklist!.total
+                    ? theme.palette.getContrastText(theme.palette.success.light)
+                    : theme.palette.text.secondary
+                ),
                 '& .MuiChip-icon': {
                   fontSize: '0.75rem',
                   color: 'inherit',

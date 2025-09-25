@@ -121,10 +121,12 @@ const BoardActions: React.FC<BoardActionsProps> = ({
       <IconButton
         onClick={onToggleStar}
         sx={{
-          color: isStarred ? '#ffd700' : 'rgba(255, 255, 255, 0.7)',
+          color: (theme) => isStarred
+            ? '#ffd700'
+            : (theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.8)' : theme.palette.text.secondary),
           '&:hover': {
             color: '#ffd700',
-            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+            backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)',
           },
         }}
       >
@@ -139,11 +141,11 @@ const BoardActions: React.FC<BoardActionsProps> = ({
           size="small"
           onClick={onInvite}
           sx={{
-            color: 'white',
-            borderColor: 'rgba(255, 255, 255, 0.3)',
+            color: (theme) => theme.palette.mode === 'dark' ? theme.palette.common.white : theme.palette.text.primary,
+            borderColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.2)',
             '&:hover': {
-              borderColor: 'rgba(255, 255, 255, 0.5)',
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              borderColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.35)',
+              backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)',
             },
           }}
         >
@@ -158,11 +160,17 @@ const BoardActions: React.FC<BoardActionsProps> = ({
         size="small"
         onClick={handleFilterOpen}
         sx={{
-          color: hasActiveFilters ? '#ffd700' : 'white',
-          borderColor: hasActiveFilters ? '#ffd700' : 'rgba(255, 255, 255, 0.3)',
+          color: (theme) => hasActiveFilters
+            ? '#ffd700'
+            : (theme.palette.mode === 'dark' ? theme.palette.common.white : theme.palette.text.primary),
+          borderColor: (theme) => hasActiveFilters
+            ? '#ffd700'
+            : (theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.2)'),
           '&:hover': {
-            borderColor: hasActiveFilters ? '#ffd700' : 'rgba(255, 255, 255, 0.5)',
-            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+            borderColor: (theme) => hasActiveFilters
+              ? '#ffd700'
+              : (theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.35)'),
+            backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)',
           },
         }}
       >
@@ -194,9 +202,9 @@ const BoardActions: React.FC<BoardActionsProps> = ({
       <IconButton
         onClick={handleMenuOpen}
         sx={{
-          color: 'white',
+          color: (theme) => theme.palette.mode === 'dark' ? theme.palette.common.white : theme.palette.text.primary,
           '&:hover': {
-            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+            backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)',
           },
         }}
       >
@@ -263,7 +271,10 @@ const BoardActions: React.FC<BoardActionsProps> = ({
                           key={value}
                           label={label?.name || value}
                           size="small"
-                          sx={{ bgcolor: label?.color || 'primary.main', color: 'white' }}
+                          sx={{
+                            bgcolor: label?.color || 'primary.main',
+                            color: (theme) => label?.color ? theme.palette.getContrastText(label.color) : theme.palette.primary.contrastText,
+                          }}
                         />
                       );
                     })}

@@ -1,10 +1,10 @@
-import React from 'react';
-import { Box, Typography } from '@mui/material';
-import BoardTitle from './BoardTitle';
-import MemberAvatars from './MemberAvatars';
-import BoardActions from './BoardActions';
-import type { BoardMember } from './MemberAvatars';
-import type { FilterOptions } from './BoardActions';
+import React from "react";
+import { Box, Typography } from "@mui/material";
+import BoardTitle from "./BoardTitle";
+import MemberAvatars from "./MemberAvatars";
+import BoardActions from "./BoardActions";
+import type { BoardMember } from "./MemberAvatars";
+import type { FilterOptions } from "./BoardActions";
 
 export interface BoardHeaderProps {
   title: string;
@@ -17,7 +17,9 @@ export interface BoardHeaderProps {
   onRemoveMember?: (memberId: string) => void;
   onInvite?: () => void;
   onFilter?: (filters: FilterOptions) => void;
-  onBoardAction?: (action: 'settings' | 'copy' | 'archive' | 'background') => void;
+  onBoardAction?: (
+    action: "settings" | "copy" | "archive" | "background"
+  ) => void;
   currentFilters?: FilterOptions;
   availableLabels?: { id: string; name: string; color: string }[];
   editable?: boolean;
@@ -40,7 +42,7 @@ const BoardHeader: React.FC<BoardHeaderProps> = ({
   editable = true,
 }) => {
   // Convert members to available members for filter
-  const availableMembers = members.map(member => ({
+  const availableMembers = members.map((member) => ({
     id: member.id,
     name: member.name,
   }));
@@ -48,40 +50,51 @@ const BoardHeader: React.FC<BoardHeaderProps> = ({
   return (
     <Box
       sx={{
-        position: 'sticky',
+        position: "sticky",
         top: 0,
         zIndex: 10,
-        background: 'rgba(0, 0, 0, 0.3)',
-        backdropFilter: 'blur(12px)',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+        // background: "rgba(0, 0, 0, 0.3)",
+        backdropFilter: "blur(12px)",
+        borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
         px: { xs: 2, sm: 3, md: 4 },
         py: 2,
+        background: (theme) =>
+          theme.palette.mode === "dark"
+            ? "linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%)"
+            : "linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #cbd5e1 100%)",
       }}
     >
       <Box
         sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          flexWrap: "wrap",
           gap: 2,
         }}
       >
         {/* Left side - Title and Description */}
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, flex: 1 }}>
+        <Box
+          sx={{ display: "flex", flexDirection: "column", gap: 0.5, flex: 1 }}
+        >
           <BoardTitle
             title={title}
             onTitleChange={onTitleChange}
             editable={editable}
           />
-          
+
           {description && (
             <Typography
               variant="body2"
               sx={{
-                color: 'rgba(255, 255, 255, 0.8)',
+                background: (theme) =>
+                  theme.palette.mode === "dark"
+                    ? "linear-gradient(135deg, #60a5fa 0%, #34d399 50%, #f472b6 100%)"
+                    : "linear-gradient(135deg, #3b82f6 0%, #10b981 50%, #ec4899 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
                 maxWidth: 600,
-                display: { xs: 'none', sm: 'block' },
+                display: { xs: "none", sm: "block" },
               }}
             >
               {description}
@@ -90,10 +103,10 @@ const BoardHeader: React.FC<BoardHeaderProps> = ({
         </Box>
 
         {/* Right side - Members and Actions */}
-        <Box 
-          sx={{ 
-            display: 'flex', 
-            alignItems: 'center', 
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
             gap: 2,
             flexShrink: 0,
           }}
@@ -123,9 +136,9 @@ const BoardHeader: React.FC<BoardHeaderProps> = ({
         <Typography
           variant="body2"
           sx={{
-            color: 'rgba(255, 255, 255, 0.8)',
+            color: "rgba(255, 255, 255, 0.8)",
             mt: 1,
-            display: { xs: 'block', sm: 'none' },
+            display: { xs: "block", sm: "none" },
           }}
         >
           {description}

@@ -51,11 +51,10 @@ const Column: React.FC<ColumnProps> = ({
         minWidth: { xs: 260, sm: 280 },
         maxWidth: { xs: 260, sm: 280 },
         width: { xs: 260, sm: 280 },
-        background: 'rgba(255, 255, 255, 0.9)',
+        backgroundColor: (theme) => theme.palette.background.paper,
         borderRadius: 3,
-        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
-        backdropFilter: 'blur(16px)',
-        border: '1px solid rgba(255, 255, 255, 0.3)',
+        boxShadow: (theme) => theme.palette.mode === 'dark' ? '0 8px 24px rgba(0,0,0,0.5)' : '0 8px 24px rgba(0,0,0,0.12)',
+        border: (theme) => `1px solid ${theme.palette.divider}`,
         display: 'flex',
         flexDirection: 'column',
         maxHeight: { 
@@ -68,16 +67,12 @@ const Column: React.FC<ColumnProps> = ({
         '&::before': {
           content: '""',
           position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
+          inset: 0,
           borderRadius: 3,
-          background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%)',
           pointerEvents: 'none',
         },
         '&:hover': {
-          boxShadow: '0 12px 40px rgba(0, 0, 0, 0.15)',
+          boxShadow: (theme) => theme.palette.mode === 'dark' ? '0 12px 36px rgba(0,0,0,0.6)' : '0 12px 36px rgba(0,0,0,0.18)',
           transform: 'translateY(-2px)',
           transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
         },
@@ -85,7 +80,7 @@ const Column: React.FC<ColumnProps> = ({
       }}
     >
       {/* Column Header */}
-      <Box sx={{ p: 2, borderBottom: '1px solid rgba(0, 0, 0, 0.06)' }}>
+      <Box sx={{ p: 2, borderBottom: (theme) => `1px solid ${theme.palette.divider}` }}>
         <ColumnHeader
           title={title}
           cardCount={cards.length}

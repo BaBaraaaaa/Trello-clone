@@ -25,14 +25,15 @@ const CardMembers: React.FC<CardMembersProps> = ({
       <AvatarGroup
         max={maxVisible}
         sx={{
-          '& .MuiAvatar-root': {
+          '& .MuiAvatar-root': (theme) => ({
             width: avatarSize,
             height: avatarSize,
             fontSize: size === 'small' ? '0.625rem' : '0.75rem',
             border: '2px solid',
-            borderColor: 'background.paper',
-            backgroundColor: 'primary.main',
-          },
+            borderColor: theme.palette.background.paper,
+            backgroundColor: theme.palette.primary.main,
+            color: theme.palette.getContrastText(theme.palette.primary.main),
+          }),
           '& .MuiAvatarGroup-avatar': {
             fontSize: size === 'small' ? '0.5rem' : '0.625rem',
             backgroundColor: 'text.secondary',
