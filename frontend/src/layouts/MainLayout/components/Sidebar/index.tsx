@@ -6,7 +6,6 @@ import {
   ListItemIcon,
   ListItemText,
   Box,
-  Toolbar,
   ListItemButton,
 } from "@mui/material";
 import DashboardIcon from "@mui/icons-material/Dashboard";
@@ -53,7 +52,6 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   const drawer = (
     <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
-      <Toolbar sx={{ minHeight: { xs: 56, sm: 64 } }} />
       <List sx={{ flex: 1, px: 1, py: 2 }}>
         {navigationItems.map((item) => (
           <ListItem key={item.text} disablePadding>
