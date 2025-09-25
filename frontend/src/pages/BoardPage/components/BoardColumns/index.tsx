@@ -2,32 +2,6 @@ import React from 'react';
 import { Box, Button } from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
 
-export interface CardData {
-  id: string;
-  title: string;
-  description?: string;
-  labels?: { color: string; text: string }[];
-  members?: string[];
-  dueDate?: string;
-  attachments?: number;
-  checklist?: { completed: number; total: number };
-  comments?: number;
-}
-
-export interface ColumnData {
-  id: string;
-  title: string;
-  cards: CardData[];
-  order: number;
-}
-
-export interface BoardMember {
-  id: string;
-  name: string;
-  avatar?: string;
-  initials: string;
-}
-
 interface BoardColumnsProps {
   onAddColumn?: () => void;
   children?: React.ReactNode;

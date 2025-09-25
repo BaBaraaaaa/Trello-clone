@@ -3,7 +3,7 @@ import { Box } from '@mui/material';
 import ColumnHeader from './ColumnHeader';
 import CardList from './CardList';
 import AddCardButton from './AddCardButton';
-import type { CardItemData } from '../CardItem';
+import type { CardItemData } from '../../../../types';
 
 interface ColumnProps {
   id: string;

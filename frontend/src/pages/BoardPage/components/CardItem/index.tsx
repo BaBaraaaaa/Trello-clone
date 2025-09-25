@@ -15,20 +15,7 @@ import {
 import CardLabels from './CardLabels';
 import CardMembers from './CardMembers';
 import CardActions from './CardActions';
-import type { CardLabel } from './CardLabels';
-import type { CardMemberData } from './CardMembers';
-
-export interface CardItemData {
-  id: string;
-  title: string;
-  description?: string;
-  labels?: CardLabel[];
-  members?: CardMemberData[];
-  dueDate?: string;
-  attachments?: number;
-  checklist?: { completed: number; total: number };
-  comments?: number;
-}
+import type { CardItemData } from '../../../../types';
 
 interface CardItemProps {
   card: CardItemData;

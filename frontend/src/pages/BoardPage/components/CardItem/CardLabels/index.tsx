@@ -1,11 +1,7 @@
 import React from 'react';
 import { Box, Chip, Tooltip } from '@mui/material';
 
-export interface CardLabel {
-  id?: string;
-  color: string;
-  text: string;
-}
+import type { ComponentCardLabel as CardLabel } from '../../../../../types';
 
 interface CardLabelsProps {
   labels: CardLabel[];

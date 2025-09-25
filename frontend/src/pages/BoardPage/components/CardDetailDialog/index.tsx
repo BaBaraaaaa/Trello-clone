@@ -27,9 +27,8 @@ import {
   Add as AddIcon,
   Delete as DeleteIcon,
 } from '@mui/icons-material';
-import type { CardItemData } from '../CardItem';
-import type { CardMemberData } from '../CardItem/CardMembers';
-import type { CardLabel } from '../CardItem/CardLabels';
+import type { CardItemData, CardMemberData, ComponentCardLabel as CardLabel } from '../../../../types';
+
 
 interface CardDetailDialogProps {
   open: boolean;

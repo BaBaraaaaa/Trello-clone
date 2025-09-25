@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box } from '@mui/material';
 import CardItem from '../../CardItem';
-import type { CardItemData } from '../../CardItem';
+import type { CardItemData } from '../../../../../types';
 
 interface CardListProps {
   cards: CardItemData[];

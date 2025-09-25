@@ -1,12 +1,7 @@
 import React from 'react';
 import { Box, Avatar, AvatarGroup, Tooltip } from '@mui/material';
 
-export interface CardMemberData {
-  id: string;
-  name: string;
-  avatar?: string;
-  initials: string;
-}
+import type { CardMemberData } from '../../../../../types';
 
 interface CardMembersProps {
   members: CardMemberData[];
