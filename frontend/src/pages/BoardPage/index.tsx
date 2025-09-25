@@ -8,13 +8,24 @@ import {
   CardDetailDialog,
 } from "./components";
 import type { CardItemData } from "../../types";
-import { useBoardData } from "../../contexts/MockDBContext";
+import { useBoardData, useMockDB } from "../../contexts/MockDBContext";
 
 // Note: Card labels for UI are derived from board labels below; no local mock needed.
 
 const BoardPage: React.FC = () => {
   const { boardId } = useParams<{ boardId: string }>();
   const boardData = useBoardData(boardId || "");
+  const {
+    updateBoardTitle,
+    addColumn,
+    updateColumnTitle,
+    addCard,
+    updateCard,
+    deleteCard,
+    archiveCard,
+    copyCard,
+    moveCard,
+  } = useMockDB();
 
   const [board, setBoard] = useState({
     id: "",
@@ -50,7 +61,10 @@ const BoardPage: React.FC = () => {
 
   // Board Header Handlers
   const handleTitleChange = (newTitle: string) => {
-    console.log("Board title changed:", newTitle);
+    if (board.id) {
+      updateBoardTitle(board.id, newTitle);
+      setBoard((prev) => ({ ...prev, title: newTitle }));
+    }
   };
 
   const handleToggleStar = () => {
@@ -75,15 +89,14 @@ const BoardPage: React.FC = () => {
 
   // Column Handlers
   const handleAddColumn = () => {
-    console.log("Add new column");
+    if (!board.id) return;
+    const index = (columns?.length || 0) + 1;
+    const title = `List ${index}`;
+    addColumn(board.id, title);
   };
 
   const handleColumnTitleChange = (columnId: string, newTitle: string) => {
-    setColumns((prev) =>
-      prev.map((col) =>
-        col.id === columnId ? { ...col, title: newTitle } : col
-      )
-    );
+    updateColumnTitle(columnId, newTitle);
   };
 
   // Card Handlers
@@ -93,23 +106,35 @@ const BoardPage: React.FC = () => {
   };
 
   const handleCardSave = (updatedCard: CardItemData) => {
-    setColumns((prev) =>
-      prev.map((col) => ({
-        ...col,
-        cards: col.cards.map((card) =>
-          card.id === updatedCard.id ? updatedCard : card
-        ),
-      }))
-    );
+    updateCard(updatedCard.id, {
+      title: updatedCard.title,
+      description: updatedCard.description,
+      dueDate: updatedCard.dueDate,
+    });
   };
 
   const handleCardDelete = (cardId: string) => {
-    setColumns((prev) =>
-      prev.map((col) => ({
-        ...col,
-        cards: col.cards.filter((card) => card.id !== cardId),
-      }))
-    );
+    deleteCard(cardId);
+  };
+
+  const handleCardCopy = (card: CardItemData) => {
+    copyCard(card.id);
+    console.log("Card copied:", card.id);
+  };
+
+  const handleCardArchive = (card: CardItemData) => {
+    archiveCard(card.id);
+  };
+
+  const handleCardMove = (card: CardItemData) => {
+    // Simple heuristic: move to the next column, or wrap to first
+    if (!boardData) return;
+    const cols = boardData.columns;
+    const currentIdx = cols.findIndex(c => c.cards.some(cd => cd.id === card.id));
+    if (currentIdx === -1) return;
+    const targetIdx = (currentIdx + 1) % cols.length;
+    const targetColumnId = cols[targetIdx].id;
+    moveCard(card.id, targetColumnId);
   };
 
   if (!boardData) {
@@ -161,8 +186,13 @@ const BoardPage: React.FC = () => {
             id={column.id}
             title={column.title}
             cards={column.cards}
-            onAddCard={() => console.log(`Add card to ${column.id}`)}
+            onAddCard={(colId, title) => addCard(colId, { title })}
             onCardClick={handleCardClick}
+            onCardEdit={handleCardClick}
+            onCardCopy={handleCardCopy}
+            onCardMove={handleCardMove}
+            onCardArchive={handleCardArchive}
+            onCardDelete={(c) => handleCardDelete(c.id)}
             onTitleChange={handleColumnTitleChange}
           />
         ))}

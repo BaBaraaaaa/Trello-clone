@@ -9,7 +9,7 @@ interface ColumnProps {
   id: string;
   title: string;
   cards: CardItemData[];
-  onAddCard?: (columnId: string) => void;
+  onAddCard?: (columnId: string, title: string) => void;
   onCardClick?: (card: CardItemData) => void;
   onCardEdit?: (card: CardItemData) => void;
   onCardCopy?: (card: CardItemData) => void;
@@ -39,10 +39,7 @@ const Column: React.FC<ColumnProps> = ({
   onDeleteColumn,
 }) => {
   const handleAddCard = (cardTitle: string) => {
-    if (onAddCard) {
-      console.log(`Adding card "${cardTitle}" to column ${id}`);
-      // TODO: Implement actual card creation
-    }
+    if (onAddCard) onAddCard(id, cardTitle);
   };
 
   return (
@@ -85,7 +82,8 @@ const Column: React.FC<ColumnProps> = ({
           title={title}
           cardCount={cards.length}
           onTitleChange={(newTitle) => onTitleChange?.(id, newTitle)}
-          onAddCard={() => onAddCard?.(id)}
+          // Quick-add via menu will create a placeholder card
+          onAddCard={() => onAddCard?.(id, 'New card')}
           onCopyColumn={() => onCopyColumn?.(id)}
           onArchiveColumn={() => onArchiveColumn?.(id)}
           onDeleteColumn={() => onDeleteColumn?.(id)}
