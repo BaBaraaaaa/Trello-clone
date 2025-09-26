@@ -1,0 +1,47 @@
+@startuml TrelloCardUpdateSequence
+skinparam backgroundColor #FFFFFF
+skinparam sequenceArrowThickness 2
+skinparam sequenceLifeLineBorderColor #0f172a
+skinparam sequenceLifeLineBackgroundColor #f1f5f9
+skinparam sequenceParticipantFontColor #0f172a
+
+actor User
+participant "Web App\n(React)" as UI
+participant "API Gateway" as APIGW
+participant "Board Service" as BoardSvc
+participant "Card Service" as CardSvc
+participant "Activity Service" as ActivitySvc
+participant "Notification Service" as NotifySvc
+participant "Operational DB" as DB
+participant "Redis Cache" as Cache
+participant "Message Broker" as Broker
+participant "WebSocket Gateway" as WSGW
+
+== Load board ==
+User -> UI : Drag card to new column
+UI -> APIGW : PATCH /boards/{id}/cards/{cardId}/move
+APIGW -> BoardSvc : route + auth context
+BoardSvc -> CardSvc : validate move request
+CardSvc -> Cache : fetch column ordering
+CardSvc -> DB : update card position & column
+CardSvc <-- DB : updated card document
+CardSvc -> Cache : adjust column/card cache
+CardSvc -> ActivitySvc : create move activity
+ActivitySvc -> DB : insert activity record
+ActivitySvc <-- DB
+CardSvc -> Broker : publish card.moved event
+
+== Notifications ==
+Broker -> NotifySvc : card.moved event
+NotifySvc -> DB : fetch subscribed members
+NotifySvc -> DB : persist notifications
+NotifySvc -> WSGW : push realtime notification
+NotifySvc -> Broker : emit email job (optional)
+
+== Response ==
+CardSvc -> BoardSvc : success payload
+BoardSvc -> APIGW : board snapshot delta
+APIGW -> UI : 200 OK + updated card & column order
+UI -> WSGW : receives broadcast update
+UI -> User : render updated board
+@enduml

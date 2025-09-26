@@ -1,0 +1,312 @@
+@startuml TrelloClassDiagram
+skinparam titleFontSize 20
+skinparam classAttributeIconSize 0
+skinparam backgroundColor #FFFFFF
+skinparam linetype ortho
+skinparam classBackgroundColor #f8fafc
+skinparam classBorderColor #0f172a
+skinparam classFontColor #0f172a
+
+left to right direction
+
+title Trello Clone Domain Class Diagram
+
+package "Workspace Context" {
+  class User {
+    +id: UUID/ObjectId
+    +username: string
+    +email: string
+    +passwordHash: string
+    +fullName: string
+    +avatarUrl: string
+    +initials: string
+    +isActive: boolean
+    +lastLoginAt: Date
+    +createdAt: Date
+    +updatedAt: Date
+  }
+
+  class Workspace {
+    +id: UUID/ObjectId
+    +name: string
+    +description: string
+    +type: WorkspaceType
+    +visibility: WorkspaceVisibility
+    +createdAt: Date
+    +updatedAt: Date
+  }
+
+  class WorkspaceMember {
+    +id: UUID/ObjectId
+    +role: WorkspaceRole
+    +joinedAt: Date
+  }
+
+  WorkspaceMember "*" -- "1" Workspace
+  WorkspaceMember "*" -- "1" User
+  Workspace "1" -- "*" Board
+}
+
+package "Board Context" {
+  class Board {
+    +id: UUID/ObjectId
+    +title: string
+    +description: string
+    +backgroundType: BackgroundType
+    +backgroundValue: string
+    +visibility: BoardVisibility
+    +isClosed: boolean
+    +createdAt: Date
+    +updatedAt: Date
+  }
+
+  class BoardMember {
+    +id: UUID/ObjectId
+    +role: BoardRole
+    +isStarred: boolean
+    +joinedAt: Date
+  }
+
+  class Column {
+    +id: UUID/ObjectId
+    +title: string
+    +position: number
+    +isArchived: boolean
+    +createdAt: Date
+    +updatedAt: Date
+  }
+
+  class Card {
+    +id: UUID/ObjectId
+    +title: string
+    +description: string
+    +position: number
+    +dueDate: Date
+    +isCompleted: boolean
+    +isArchived: boolean
+    +coverColor: string
+    +coverAttachmentId: UUID/ObjectId
+    +createdAt: Date
+    +updatedAt: Date
+  }
+
+  class CardMember {
+    +id: UUID/ObjectId
+    +assignedAt: Date
+    +assignedBy: UUID/ObjectId
+  }
+
+  class Label {
+    +id: UUID/ObjectId
+    +name: string
+    +color: string
+    +createdAt: Date
+  }
+
+  class CardLabel {
+    +id: UUID/ObjectId
+    +createdAt: Date
+  }
+
+  BoardMember "*" -- "1" Board
+  BoardMember "*" -- "1" User
+  Board "1" -- "*" Column
+  Column "1" -- "*" Card
+  Board "1" -- "*" Card : aggregate
+  CardMember "*" -- "1" Card
+  CardMember "*" -- "1" User
+  Board "1" -- "*" Label
+  CardLabel "*" -- "1" Card
+  CardLabel "*" -- "1" Label
+}
+
+package "Checklist & Comments" {
+  class Checklist {
+    +id: UUID/ObjectId
+    +title: string
+    +position: number
+    +createdAt: Date
+    +updatedAt: Date
+  }
+
+  class ChecklistItem {
+    +id: UUID/ObjectId
+    +content: string
+    +isCompleted: boolean
+    +position: number
+    +dueDate: Date
+    +assignedTo: UUID/ObjectId
+    +completedAt: Date
+    +createdAt: Date
+    +updatedAt: Date
+  }
+
+  class Comment {
+    +id: UUID/ObjectId
+    +content: string
+    +isEdited: boolean
+    +editedAt: Date
+    +createdAt: Date
+    +updatedAt: Date
+  }
+
+  class Attachment {
+    +id: UUID/ObjectId
+    +filename: string
+    +originalFilename: string
+    +fileSize: number
+    +mimeType: string
+    +fileUrl: string
+    +thumbnailUrl: string
+    +isCover: boolean
+    +uploadedAt: Date
+  }
+
+  Card "1" -- "*" Checklist
+  Checklist "1" -- "*" ChecklistItem
+  Card "1" -- "*" Comment
+  Comment "*" -- "1" User
+  Card "1" -- "*" Attachment
+  Attachment "*" -- "1" User : uploadedBy
+}
+
+package "Activity & Notifications" {
+  class Activity {
+    +id: UUID/ObjectId
+    +actionType: ActivityType
+    +entityType: EntityType
+    +entityId: UUID/ObjectId
+    +details: JSON
+    +createdAt: Date
+  }
+
+  class Notification {
+    +id: UUID/ObjectId
+    +type: NotificationType
+    +title: string
+    +message: string
+    +entityType: EntityType
+    +entityId: UUID/ObjectId
+    +isRead: boolean
+    +readAt: Date
+    +createdAt: Date
+  }
+
+  Activity "*" -- "1" Board
+  Activity "*" -- "0..1" Card
+  Activity "*" -- "1" User
+  Notification "*" -- "1" User
+}
+
+package "Custom Fields" {
+  class CustomField {
+    +id: UUID/ObjectId
+    +name: string
+    +type: CustomFieldType
+    +options: JSON
+    +isRequired: boolean
+    +position: number
+    +createdAt: Date
+    +updatedAt: Date
+  }
+
+  class CardCustomField {
+    +id: UUID/ObjectId
+    +value: Mixed
+    +createdAt: Date
+    +updatedAt: Date
+  }
+
+  Board "1" -- "*" CustomField
+  CustomField "1" -- "*" CardCustomField
+  CardCustomField "*" -- "1" Card
+}
+
+' Enumerations
+class WorkspaceType <<enumeration>> {
+  PERSONAL
+  TEAM
+  ENTERPRISE
+}
+class WorkspaceVisibility <<enumeration>> {
+  PRIVATE
+  PUBLIC
+}
+class BoardVisibility <<enumeration>> {
+  PRIVATE
+  WORKSPACE
+  PUBLIC
+}
+class BackgroundType <<enumeration>> {
+  COLOR
+  GRADIENT
+  IMAGE
+}
+class BoardRole <<enumeration>> {
+  OWNER
+  ADMIN
+  MEMBER
+  OBSERVER
+}
+class WorkspaceRole <<enumeration>> {
+  ADMIN
+  MEMBER
+}
+class ActivityType <<enumeration>> {
+  CREATE_BOARD
+  UPDATE_BOARD
+  ARCHIVE_BOARD
+  CREATE_COLUMN
+  UPDATE_COLUMN
+  MOVE_COLUMN
+  ARCHIVE_COLUMN
+  CREATE_CARD
+  UPDATE_CARD
+  MOVE_CARD
+  ARCHIVE_CARD
+  ADD_CARD_MEMBER
+  REMOVE_CARD_MEMBER
+  ADD_CARD_LABEL
+  REMOVE_CARD_LABEL
+  ADD_COMMENT
+  UPDATE_COMMENT
+  DELETE_COMMENT
+  ADD_ATTACHMENT
+  DELETE_ATTACHMENT
+  ADD_CHECKLIST
+  UPDATE_CHECKLIST
+  DELETE_CHECKLIST
+  COMPLETE_CHECKLIST_ITEM
+  ADD_BOARD_MEMBER
+  REMOVE_BOARD_MEMBER
+  UPDATE_MEMBER_ROLE
+}
+class EntityType <<enumeration>> {
+  BOARD
+  COLUMN
+  CARD
+  COMMENT
+  ATTACHMENT
+  CHECKLIST
+  CHECKLIST_ITEM
+  MEMBER
+  LABEL
+}
+class NotificationType <<enumeration>> {
+  CARD_ASSIGNED
+  CARD_DUE_SOON
+  CARD_OVERDUE
+  COMMENT_ADDED
+  BOARD_INVITATION
+  CHECKLIST_COMPLETED
+  ATTACHMENT_ADDED
+}
+class CustomFieldType <<enumeration>> {
+  TEXT
+  NUMBER
+  DATE
+  CHECKBOX
+  DROPDOWN
+}
+
+@enduml

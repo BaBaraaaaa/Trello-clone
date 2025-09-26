@@ -1,0 +1,46 @@
+@startuml TrelloBoardActivity
+skinparam backgroundColor #FFFFFF
+skinparam activityDiamondBackgroundColor #eef2ff
+skinparam activityBackgroundColor #f8fafc
+skinparam activityArrowColor #1e40af
+skinparam noteBackgroundColor #ede9fe
+skinparam noteBorderColor #8b5cf6
+
+start
+:User opens app;
+:Authenticate via Auth Service;
+if (Credentials valid?) then (yes)
+  :Issue JWT + refresh token;
+  :Load user workspaces via Workspace Service;
+  :Select board from dashboard;
+  if (Has board access?) then (yes)
+    :Fetch board snapshot (Board Service);
+    :Render columns/cards on UI;
+    fork
+      :Listen WebSocket for real-time events;
+    fork again
+      :Start activity stream polling;
+    end fork
+    partition "Card update" {
+      :User drags card to new column;
+      :UI emits moveCard event;
+      :Board Service validates permission;
+      if (Valid move?) then (yes)
+        :Update card position;
+        :Append activity log;
+        :Notify members (Notification Service);
+        :Broadcast WebSocket event;
+        :Return updated board state;
+      else (no)
+        :Return validation errors;
+      endif
+    }
+    :UI syncs latest state;
+  else (no)
+    :Show access denied message;
+  endif
+else (no)
+  :Show error toast;
+endif
+stop
+@enduml

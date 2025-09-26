@@ -1,0 +1,109 @@
+@startuml TrelloComponentArchitecture
+skinparam componentStyle rectangle
+skinparam backgroundColor #FFFFFF
+skinparam componentBackgroundColor #f8fafc
+skinparam componentBorderColor #1e293b
+skinparam componentFontColor #111827
+skinparam databaseBackgroundColor #fef3c7
+skinparam databaseBorderColor #f59e0b
+skinparam arrowColor #0f172a
+skinparam packageTitleFontColor #0f172a
+
+rectangle "Client Tier" {
+  component "Web App\n(React + Vite)" as WebApp
+  component "Mobile App" as Mobile
+}
+
+rectangle "Edge & Routing" {
+  component "API Gateway\n(rate limiting, routing)" as APIGateway
+  component "WebSocket Gateway" as WSGateway
+}
+
+rectangle "Microservices" {
+  component "Auth Service" as Auth
+  component "User Service" as UserSvc
+  component "Workspace Service" as WorkspaceSvc
+  component "Board Service" as BoardSvc
+  component "Card Service" as CardSvc
+  component "Notification Service" as NotifySvc
+  component "File Service" as FileSvc
+  component "Search Service" as SearchSvc
+}
+
+rectangle "Data & Messaging" {
+  database "Operational DB\n(PostgreSQL / MongoDB)" as MainDB
+  database "Cache Layer\n(Redis)" as Redis
+  database "Object Storage\n(S3/GCS)" as ObjectStore
+  component "Message Broker\n(NATS / Kafka)" as Broker
+  component "Analytics Pipeline" as Analytics
+}
+
+component "Data Lake / Warehouse" as DataLake
+
+rectangle "Observability" {
+  component "Monitoring" as Monitoring
+  component "Logging" as Logging
+  component "Tracing" as Tracing
+}
+
+' Client to edge
+WebApp --> APIGateway : REST
+Mobile --> APIGateway : REST
+WebApp --> WSGateway : WebSocket
+
+' Edge to services
+APIGateway --> Auth
+APIGateway --> UserSvc
+APIGateway --> WorkspaceSvc
+APIGateway --> BoardSvc
+APIGateway --> CardSvc
+APIGateway --> NotifySvc
+APIGateway --> FileSvc
+APIGateway --> SearchSvc
+
+WSGateway --> BoardSvc
+WSGateway --> CardSvc
+WSGateway --> NotifySvc
+
+' Service interactions
+Auth --> Redis : session cache
+Auth --> MainDB : users, tokens
+
+UserSvc --> MainDB
+WorkspaceSvc --> MainDB
+BoardSvc --> MainDB
+CardSvc --> MainDB
+NotifySvc --> MainDB
+SearchSvc --> MainDB
+
+BoardSvc --> Redis : board snapshot cache
+CardSvc --> Redis : card ordering cache
+
+FileSvc --> ObjectStore : upload/download
+
+BoardSvc --> Broker : board events
+CardSvc --> Broker : card events
+NotifySvc --> Broker : notification events
+SearchSvc --> Broker : index updates
+
+Broker --> NotifySvc : fan-out
+Broker --> SearchSvc : async indexing
+Broker --> Analytics : stream processing
+
+Analytics --> DataLake : batch storage
+
+' Observability
+Auth --> Monitoring
+BoardSvc --> Monitoring
+CardSvc --> Monitoring
+NotifySvc --> Monitoring
+Auth --> Logging
+BoardSvc --> Logging
+CardSvc --> Logging
+NotifySvc --> Logging
+Auth --> Tracing
+BoardSvc --> Tracing
+CardSvc --> Tracing
+NotifySvc --> Tracing
+
+@enduml
