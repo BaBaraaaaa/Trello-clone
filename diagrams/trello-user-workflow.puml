@@ -1,0 +1,33 @@
+@startuml trello-user-workflow
+|User|
+start
+:Open Application;
+:Login / Register;
+if (Authenticated?) then (yes)
+  :Redirect to Dashboard;
+  partition Dashboard {
+    :View Stats (Boards, Tasks, Progress);
+    :Create New Board;
+    :Select Existing Board;
+  }
+  if (New Board?) then (yes)
+    :Enter Board Title;
+    :Confirm Creation;
+    :Redirect to Board Page;
+  endif
+  partition BoardPage {
+    :View Columns and Cards;
+    :Add Column;
+    :Add Card to Column;
+    :Open Card Details;
+    :Edit Card (Title, Description, Labels, Members, Due Date);
+    :Save Changes;
+    :Move or Archive Card;
+    :Return to Board View;
+  }
+  :Navigate Back to Dashboard;
+else (no)
+  stop
+endif
+stop
+@enduml

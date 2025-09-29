@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import {
   Box,
   Typography,
@@ -24,6 +24,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts";
 import { useMockDB } from "../../contexts/MockDBContext";
+import CreateBoardModal from "./components/CreateBoardModal";
 import { BoardCard, StatCard } from "./components";
 
 // Mock data cho recent activity
@@ -60,6 +61,14 @@ const recentActivities = [
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  // state for create board modal
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const handleCloseCreateModal = useCallback(() => setIsCreateModalOpen(false), []);
+  const handleCreateBoard = useCallback((title: string) => {
+    // TODO: replace with real create logic
+    console.log("Create new board:", title);
+    setIsCreateModalOpen(false);
+  }, []);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedBoard, setSelectedBoard] = useState<string | null>(null);
   const { db, getBoardMembers } = useMockDB();
@@ -126,10 +135,7 @@ const Dashboard: React.FC = () => {
     navigate(`/board/${boardId}`);
   };
 
-  const createNewBoard = () => {
-    // TODO: Implement create board modal
-    console.log("Create new board");
-  };
+  const createNewBoard = () => setIsCreateModalOpen(true);
 
   // Statistics calculations
   const totalBoards = boards.length;
@@ -432,6 +438,11 @@ const Dashboard: React.FC = () => {
             Board Settings
           </MenuItem>
         </Menu>
+        <CreateBoardModal
+          open={isCreateModalOpen}
+          onClose={handleCloseCreateModal}
+          onCreate={handleCreateBoard}
+        />
       </Box>
     </Box>
   );
