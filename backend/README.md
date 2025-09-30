@@ -81,6 +81,27 @@
 | PUT    | `/api/cards/:id`            | Cập nhật card               |
 | DELETE | `/api/cards/:id`            | Xóa card                    |
 
+### Labels
+
+> **Yêu cầu** header `Authorization: Bearer <token>`
+
+| Method | URL                            | Mô tả                              |
+|--------|--------------------------------|------------------------------------|
+| GET    | `/api/labels/board/:boardId`   | Lấy nhãn theo board ID            |
+| POST   | `/api/labels`                  | Tạo nhãn mới                      |
+| PUT    | `/api/labels/:id`              | Cập nhật nhãn theo ID             |
+| DELETE | `/api/labels/:id`              | Xóa nhãn theo ID                  |
+
+### Card-Labels
+
+> **Yêu cầu** header `Authorization: Bearer <token>`
+
+| Method | URL                               | Mô tả                             |
+|--------|-----------------------------------|-----------------------------------|
+| GET    | `/api/card-labels/card/:cardId`   | Lấy nhãn đã gán cho card theo ID |
+| POST   | `/api/card-labels`                | Gán nhãn cho card                |
+| DELETE | `/api/card-labels/:id`            | Bỏ gán nhãn khỏi card            |
+
 ## 💡 Additional Endpoints and Future Features
 
 ### 1. Authentication Enhancements

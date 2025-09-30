@@ -38,6 +38,12 @@ app.use("/api/columns", columnsRoutes);
 // Cards routes
 import cardsRoutes from "./routes/cards.routes";
 app.use("/api/cards", cardsRoutes);
+// Label system routes
+import labelsRoutes from "./routes/labels.routes";
+app.use("/api/labels", labelsRoutes);
+// Card-Label assignment routes
+import cardLabelsRoutes from "./routes/cardLabels.routes";
+app.use("/api/card-labels", cardLabelsRoutes);
 
 // // Swagger setup
 const swaggerOptions = {
