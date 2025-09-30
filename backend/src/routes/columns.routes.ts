@@ -30,6 +30,88 @@ router.use(authenticate);
  *         description: Success
  */
 
+/**
+ * @swagger
+ * /api/columns:
+ *   post:
+ *     tags: [Columns]
+ *     summary: Create a new column
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - boardId
+ *               - title
+ *             properties:
+ *               boardId:
+ *                 type: string
+ *               title:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Column created
+ *       400:
+ *         description: Bad request
+ */
+
+/**
+ * @swagger
+ * /api/columns/{id}:
+ *   put:
+ *     tags: [Columns]
+ *     summary: Update column by ID
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               isArchived:
+ *                 type: boolean
+ *     responses:
+ *       200:
+ *         description: Updated column
+ *       404:
+ *         description: Column not found
+ */
+
+/**
+ * @swagger
+ * /api/columns/{id}:
+ *   delete:
+ *     tags: [Columns]
+ *     summary: Delete column by ID
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Column deleted
+ *       404:
+ *         description: Column not found
+ */
+
 // GET all columns for a board
 router.get('/board/:boardId', async (req: Request, res: Response) => {
   const { boardId } = req.params;

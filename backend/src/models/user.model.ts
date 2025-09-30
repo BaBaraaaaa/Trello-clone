@@ -9,6 +9,7 @@ export interface IUser extends Document {
   initials: string;
   isActive: boolean;
   lastLoginAt?: Date;
+  refreshTokens: string[];
 }
 
 const UserSchema = new Schema<IUser>(
@@ -28,7 +29,8 @@ const UserSchema = new Schema<IUser>(
       },
     },
     isActive: { type: Boolean, default: true },
-    lastLoginAt: { type: Date },
+  lastLoginAt: { type: Date },
+  refreshTokens: { type: [String], default: [] },
   },
   { timestamps: true }
 );
