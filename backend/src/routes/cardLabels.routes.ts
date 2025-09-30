@@ -19,7 +19,8 @@ router.use(authenticate);
  * @swagger
  * /api/card-labels/card/{cardId}:
  *   get:
- *     tags: [CardLabels]
+ *     tags:
+ *       - CardLabels
  *     summary: Get labels assigned to a card
  *     parameters:
  *       - in: path
@@ -31,22 +32,47 @@ router.use(authenticate);
  *       200:
  *         description: List of labels assigned to the card
  */
-// Get labels assigned to a card
-router.get(
-  "/card/:cardId",
-  [param("cardId").isMongoId().withMessage("Invalid card ID"), validateRequest],
+/**
+ * @swagger
+ * /api/card-labels/card/{cardId}/label/{labelId}:
+ *   delete:
+ *     tags:
+ *       - CardLabels
+ *     summary: Unassign a label from a card by cardId and labelId
+ *     parameters:
+ *       - in: path
+ *         name: cardId
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: path
+ *         name: labelId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Label unassigned from card
+ *       404:
+ *         description: Assignment not found
+ */
+// Unassign a label from a card by cardId and labelId
+router.delete(
+  '/card/:cardId/label/:labelId',
+  [
+    param('cardId').isMongoId().withMessage('Invalid card ID'),
+    param('labelId').isMongoId().withMessage('Invalid label ID'),
+    validateRequest,
+  ],
   async (req: Request, res: Response) => {
-    const { cardId } = req.params;
+    const { cardId, labelId } = req.params;
     try {
-      const assignments = await CardLabel.find({ cardId }).populate(
-        "labelId",
-        "name color"
-      );
-      const labels = assignments.map((a) => a.labelId);
-      res.json(labels);
+      const result = await CardLabel.findOneAndDelete({ cardId, labelId });
+      if (!result) return res.status(404).json({ message: 'Assignment not found' });
+      res.json({ message: 'Label unassigned from card' });
     } catch (err) {
       console.error(err);
-      res.status(500).json({ message: "Server error" });
+      res.status(500).json({ message: 'Server error' });
     }
   }
 );
@@ -112,45 +138,5 @@ router.post(
   }
 );
 
-/**
- * @swagger
- * /api/card-labels/{id}:
- *   delete:
- *     tags: [CardLabels]
- *     summary: Unassign a label from a card
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Label unassigned from card
- *       404:
- *         description: Assignment not found
- */
-// Unassign a label from a card
-router.delete(
-  "/:id",
-  [
-    param("id").isMongoId().withMessage("Invalid assignment ID"),
-    body("cardId").isMongoId(),
-    body("labelId").isMongoId(),
-    validateRequest,
-  ],
-  async (req: Request, res: Response) => {
-    const { cardId, labelId } = req.params;
-    try {
-      const result = await CardLabel.findOneAndDelete({ cardId, labelId });
-      if (!result)
-        return res.status(404).json({ message: "Assignment not found" });
-      res.json({ message: "Label unassigned from card" });
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ message: "Server error" });
-    }
-  }
-);
 
 export default router;

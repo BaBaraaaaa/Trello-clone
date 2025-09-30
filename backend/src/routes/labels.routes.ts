@@ -19,7 +19,7 @@ router.use(authenticate);
  * /api/labels/board/{boardId}:
  *   get:
  *     tags: [Labels]
-   summary: Get labels for a board
+ *     summary: Get labels for a board
  *     parameters:
  *       - in: path
  *         name: boardId
@@ -51,7 +51,7 @@ router.get(
  * /api/labels:
  *   post:
  *     tags: [Labels]
-   summary: Create a new label
+ *     summary: Create a new label
  *     requestBody:
  *       required: true
  *       content:
@@ -106,7 +106,7 @@ router.post(
  * /api/labels/{id}:
  *   put:
  *     tags: [Labels]
-   summary: Update a label by ID
+ *     summary: Update a label by ID
  *     parameters:
  *       - in: path
  *         name: id
@@ -158,7 +158,7 @@ router.put(
  * /api/labels/{id}:
  *   delete:
  *     tags: [Labels]
-   summary: Delete a label by ID
+ *     summary: Delete a label by ID
  *     parameters:
  *       - in: path
  *         name: id
