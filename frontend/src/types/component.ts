@@ -16,7 +16,7 @@ export interface CardItemData {
 export interface CardLabel {
   id?: string;
   color: string;
-  text: string;
+  name: string;
 }
 
 export interface CardMemberData {

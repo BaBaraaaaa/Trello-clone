@@ -16,10 +16,10 @@ import { useAuth } from "../../hooks/useAuth";
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  // Redux auth state
+  const { login, isLoading, error: authError } = useAuth();
 
-  const { login } = useAuth();
+  // single useAuth destructuring above provides login, isLoading, authError
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -28,21 +28,11 @@ const LoginPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-    setIsLoading(true);
-
     try {
-      const success = await login(email, password);
-      
-      if (success) {
-        navigate(from, { replace: true });
-      } else {
-        setError("Email hoặc mật khẩu không đúng");
-      }
+      await login(email, password);
+      navigate(from, { replace: true });
     } catch {
-      setError("Có lỗi xảy ra khi đăng nhập");
-    } finally {
-      setIsLoading(false);
+      // error handled by auth slice
     }
   };
 
@@ -82,9 +72,9 @@ const LoginPage = () => {
               Đăng nhập
             </Typography>
 
-            {error && (
+            {authError && (
               <Alert severity="error" sx={{ mb: 2 }}>
-                {error}
+                {authError}
               </Alert>
             )}
 

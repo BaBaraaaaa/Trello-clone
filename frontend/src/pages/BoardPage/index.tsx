@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Box } from "@mui/material";
+import React, { useState } from "react";
+import { Box, Typography } from "@mui/material";
 import { useParams } from "react-router-dom";
 import {
   BoardHeader,
@@ -8,142 +8,70 @@ import {
   CardDetailDialog,
 } from "./components";
 import type { CardItemData } from "../../types";
-import { useBoardData, useMockDB } from "../../contexts/MockDBContext";
+// Type for board members API response (populated userId)
+type MemberResponse = {
+  id: string;
+  userId: { fullName: string; avatarUrl?: string; initials: string };
+};
+import { useGetBoardQuery,
+  useGetColumnsQuery,
+  useGetLabelsQuery,
+  useGetCardsQuery,
+  useGetBoardMembersQuery,
+  useAddBoardMemberMutation,
+  useDeleteBoardMemberMutation
+} from "../../services/api/apiSlice";
 
-// Note: Card labels for UI are derived from board labels below; no local mock needed.
 
 const BoardPage: React.FC = () => {
   const { boardId } = useParams<{ boardId: string }>();
-  const boardData = useBoardData(boardId || "");
-  const {
-    updateBoardTitle,
-    addColumn,
-    updateColumnTitle,
-    addCard,
-    updateCard,
-    deleteCard,
-    archiveCard,
-    copyCard,
-    moveCard,
-  } = useMockDB();
+  const bid = boardId!;
 
-  const [board, setBoard] = useState({
-    id: "",
-    title: "",
-    description: "",
-    isStarred: false,
-    background: "",
-  });
+  // RTK Query hooks
+  const { data: board, isLoading: loadingBoard, error: boardError } = useGetBoardQuery(bid);
+  const { data: columns = [], isLoading: loadingCols, error: colsError } = useGetColumnsQuery(bid);
+  const { data: labels = [] } = useGetLabelsQuery(bid);
+  // Board members
+  const boardMembersQuery = useGetBoardMembersQuery(bid);
+  const members: MemberResponse[] = boardMembersQuery.data ?? [];
+  const [addMember] = useAddBoardMemberMutation();
+  const [removeMember] = useDeleteBoardMemberMutation();
 
-  const [columns, setColumns] = useState<
-    {
-      id: string;
-      title: string;
-      cards: CardItemData[];
-    }[]
-  >([]);
-
-  // Sync local state when route or data changes
-  useEffect(() => {
-    if (!boardData) return;
-    setBoard({
-      id: boardData.board.id,
-      title: boardData.board.title,
-      description: boardData.board.description || "",
-      isStarred: false,
-      background: boardData.board.backgroundValue,
-    });
-    setColumns(boardData.columns);
-  }, [boardId, boardData]);
-  const [isStarred, setIsStarred] = useState(board.isStarred);
   const [selectedCard, setSelectedCard] = useState<CardItemData | null>(null);
   const [isCardDetailOpen, setIsCardDetailOpen] = useState(false);
 
-  // Board Header Handlers
-  const handleTitleChange = (newTitle: string) => {
-    if (board.id) {
-      updateBoardTitle(board.id, newTitle);
-      setBoard((prev) => ({ ...prev, title: newTitle }));
-    }
-  };
-
-  const handleToggleStar = () => {
-    setIsStarred(!isStarred);
-  };
-
-  const handleAddMember = (email: string) => {
-    console.log("Add member:", email);
-  };
-
-  const handleRemoveMember = (memberId: string) => {
-    console.log("Remove member:", memberId);
-  };
-
-  const handleFilter = (filters: unknown) => {
-    console.log("Apply filters:", filters);
-  };
-
-  const handleBoardAction = (action: string) => {
-    console.log("Board action:", action);
-  };
-
-  // Column Handlers
-  const handleAddColumn = () => {
-    if (!board.id) return;
-    const index = (columns?.length || 0) + 1;
-    const title = `List ${index}`;
-    addColumn(board.id, title);
-  };
-
-  const handleColumnTitleChange = (columnId: string, newTitle: string) => {
-    updateColumnTitle(columnId, newTitle);
-  };
-
-  // Card Handlers
-  const handleCardClick = (card: CardItemData) => {
-    setSelectedCard(card);
-    setIsCardDetailOpen(true);
-  };
-
-  const handleCardSave = (updatedCard: CardItemData) => {
-    updateCard(updatedCard.id, {
-      title: updatedCard.title,
-      description: updatedCard.description,
-      dueDate: updatedCard.dueDate,
-    });
-  };
-
-  const handleCardDelete = (cardId: string) => {
-    deleteCard(cardId);
-  };
-
-  const handleCardCopy = (card: CardItemData) => {
-    copyCard(card.id);
-    console.log("Card copied:", card.id);
-  };
-
-  const handleCardArchive = (card: CardItemData) => {
-    archiveCard(card.id);
-  };
-
-  const handleCardMove = (card: CardItemData) => {
-    // Simple heuristic: move to the next column, or wrap to first
-    if (!boardData) return;
-    const cols = boardData.columns;
-    const currentIdx = cols.findIndex(c => c.cards.some(cd => cd.id === card.id));
-    if (currentIdx === -1) return;
-    const targetIdx = (currentIdx + 1) % cols.length;
-    const targetColumnId = cols[targetIdx].id;
-    moveCard(card.id, targetColumnId);
-  };
-
-  if (!boardData) {
+  // Column component that fetches cards via RTK Query
+  const ColumnWithCards: React.FC<{ col: typeof columns[number] }> = ({ col }) => {
+    const { data: rawCards = [], isLoading: loadingCards, error: cardsError } = useGetCardsQuery(col.id);
+    const cards = rawCards.map(card => ({
+      id: card.id,
+      title: card.title,
+      description: card.description,
+      labels: [],
+      members: [],
+      dueDate: card.dueDate?.toString(),
+    }));
+    if (loadingCards) return <Typography>Loading cards...</Typography>;
+    if (cardsError) return <Typography>Error loading cards</Typography>;
     return (
-      <Box sx={{ p: 3, bgcolor: "background.default", color: "text.primary" }}>
-        Board not found
-      </Box>
+      <Column
+        id={col.id}
+        title={col.title}
+        cards={cards}
+        onAddCard={() => console.log("Add card to", col.id)}
+        onCardClick={(card) => { setSelectedCard(card); setIsCardDetailOpen(true); }}
+        onCardEdit={(card) => console.log("Edit card", card)}
+        onCardCopy={(card) => console.log("Copy card", card)}
+        onCardMove={(card) => console.log("Move card", card)}
+        onCardArchive={(card) => console.log("Archive card", card)}
+        onCardDelete={(card) => console.log("Delete card", card)}
+        onTitleChange={(id, title) => console.log("Column title change", id, title)}
+      />
     );
-  }
+  };
+
+  if (loadingBoard || loadingCols) return <Typography>Loading...</Typography>;
+  if (boardError || colsError || !board) return <Typography>Error loading board</Typography>;
 
   return (
     <Box
@@ -160,41 +88,29 @@ const BoardPage: React.FC = () => {
       }}
     >
       {/* Board Header */}
-      <BoardHeader
+  <BoardHeader
         title={board.title}
-        description={board.description}
-        members={boardData.members}
-        isStarred={isStarred}
-        onTitleChange={handleTitleChange}
-        onToggleStar={handleToggleStar}
-        onAddMember={handleAddMember}
-        onRemoveMember={handleRemoveMember}
-        onFilter={handleFilter}
-        onBoardAction={handleBoardAction}
-        availableLabels={boardData.labels.map((l) => ({
-          id: l.id,
-          name: l.text,
-          color: l.color,
+        description={board.description || ""}
+        members={members.map((m: MemberResponse) => ({
+          id: m.id,
+          name: m.userId.fullName,
+          avatar: m.userId.avatarUrl,
+          initials: m.userId.initials,
         }))}
+        isStarred={false}
+        onTitleChange={(newTitle) => console.log("Title change", newTitle)}
+        onToggleStar={() => console.log("Toggle star")}
+        onAddMember={(userId) => addMember({ boardId: bid, userId })}
+        onRemoveMember={(id) => removeMember(id)}
+        onFilter={(filters) => console.log("Filter", filters)}
+        onBoardAction={(action) => console.log("Board action", action)}
+        availableLabels={labels.map((l) => ({ id: l.id, name: l.name, color: l.color }))}
       />
 
       {/* Board Columns */}
-      <BoardColumns onAddColumn={handleAddColumn}>
-        {columns.map((column) => (
-          <Column
-            key={column.id}
-            id={column.id}
-            title={column.title}
-            cards={column.cards}
-            onAddCard={(colId, title) => addCard(colId, { title })}
-            onCardClick={handleCardClick}
-            onCardEdit={handleCardClick}
-            onCardCopy={handleCardCopy}
-            onCardMove={handleCardMove}
-            onCardArchive={handleCardArchive}
-            onCardDelete={(c) => handleCardDelete(c.id)}
-            onTitleChange={handleColumnTitleChange}
-          />
+      <BoardColumns onAddColumn={() => console.log("Add column")}>   
+        {columns.map(col => (
+          <ColumnWithCards key={col.id} col={col} />
         ))}
       </BoardColumns>
 
@@ -202,11 +118,10 @@ const BoardPage: React.FC = () => {
       <CardDetailDialog
         open={isCardDetailOpen}
         card={selectedCard}
-        boardMembers={boardData.members}
-        availableLabels={boardData.labels}
         onClose={() => setIsCardDetailOpen(false)}
-        onSave={handleCardSave}
-        onDelete={handleCardDelete}
+        onSave={(card) => console.log("Save card", card)}
+        boardMembers={[]} // To implement
+        availableLabels={labels.map((l) => ({ id: l.id, name: l.name, color: l.color }))}
       />
     </Box>
   );

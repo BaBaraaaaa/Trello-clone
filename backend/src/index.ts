@@ -14,8 +14,10 @@ const app = express();
 
 // Middleware
 // Configure CORS
-const corsOrigin = process.env.CORS_ORIGIN || '*';
-app.use(cors({ origin: corsOrigin, credentials: true }));
+const corsOrigin = process.env.CORS_ORIGIN || "*";
+app.use(
+  cors({ origin: [corsOrigin, "http://localhost:5173"], credentials: true })
+);
 app.use(express.json());
 
 // Connect to MongoDB
@@ -44,6 +46,9 @@ app.use("/api/labels", labelsRoutes);
 // Card-Label assignment routes
 import cardLabelsRoutes from "./routes/cardLabels.routes";
 app.use("/api/card-labels", cardLabelsRoutes);
+// BoardMembers routes
+import boardMembersRoutes from "./routes/boardMembers.routes";
+app.use("/api/board-members", boardMembersRoutes);
 
 // // Swagger setup
 const swaggerOptions = {
@@ -82,7 +87,7 @@ app.use((req, res) => {
 });
 
 // Start server on all network interfaces
-const PORT = parseInt(process.env.PORT || '5000', 10);
+const PORT = parseInt(process.env.PORT || "5000", 10);
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
 });

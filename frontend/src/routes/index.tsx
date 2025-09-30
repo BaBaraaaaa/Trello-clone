@@ -1,19 +1,21 @@
 import { Routes, Route } from "react-router-dom";
-import HomePage from "../pages/HomePage";
-import BoardPage from "../pages/BoardPage";
-import ProfilePage from "../pages/ProfilePage";
-import NotFoundPage from "../pages/NotFoundPage";
-import LoginPage from "../pages/Auth/LoginPage";
-import RegisterPage from "../pages/Auth/RegisterPage";
 import App from "../App";
 import ProtectedRoute from "../components/ProtectedRoute";
 import PublicRoute from "../components/PublicRoute";
+
+// Pages
 import Dashboard from "../pages/Dashboard";
+import BoardPage from "../pages/BoardPage";
+import ProfilePage from "../pages/ProfilePage";
+import HomePage from "../pages/HomePage";
+import LoginPage from "../pages/auth/LoginPage";
+import RegisterPage from "../pages/auth/RegisterPage";
+import NotFoundPage from "../pages/NotFoundPage";
 
 function Router() {
   return (
     <Routes>
-      {/* Protected Routes - Cần đăng nhập */}
+      {/* Protected Routes */}
       <Route
         path="/"
         element={
@@ -22,40 +24,33 @@ function Router() {
           </ProtectedRoute>
         }
       >
-        {/* Dashboard - Trang chủ */}
+        {/* Default and alias routes for Dashboard */}
         <Route index element={<Dashboard />} />
-
-        {/* Boards - Quản lý dự án */}
+        <Route path="dashboard" element={<Dashboard />} />
         <Route path="board/:boardId" element={<BoardPage />} />
-
-        {/* Profile - Hồ sơ cá nhân */}
         <Route path="profile" element={<ProfilePage />} />
-
-        {/* Homepage - Trang chủ */}
         <Route path="home" element={<HomePage />} />
       </Route>
 
-      {/* Public Routes - Không cần đăng nhập */}
-      <Route path="/auth">
-        <Route
-          path="login"
-          element={
-            <PublicRoute redirectTo="/">
-              <LoginPage />
-            </PublicRoute>
-          }
-        />
-        <Route
-          path="register"
-          element={
-            <PublicRoute redirectTo="/">
-              <RegisterPage />
-            </PublicRoute>
-          }
-        />
-      </Route>
+      {/* Public Routes */}
+      <Route
+        path="/auth/login"
+        element={
+          <PublicRoute redirectTo="/">
+            <LoginPage />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/auth/register"
+        element={
+          <PublicRoute redirectTo="/">
+            <RegisterPage />
+          </PublicRoute>
+        }
+      />
 
-      {/* 404 Page */}
+      {/* Fallback */}
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );

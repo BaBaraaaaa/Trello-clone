@@ -52,4 +52,77 @@ You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-re
       },
       // other options...
     },
+
+## Data Models (Frontend Types)
+
+The frontend defines TypeScript interfaces in `src/types/database.ts` that mirror the backend Mongoose models:
+
+**Board**
+```ts
+interface Board {
+  id: string;
+  title: string;
+  description?: string;
+  background: { type: 'color' | 'gradient' | 'image'; value: string };
+  visibility: 'private' | 'workspace' | 'public';
+  isClosed: boolean;
+  createdBy: string;
+  workspaceId?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+**Column**
+```ts
+interface Column {
+  id: string;
+  boardId: string;
+  title: string;
+  position: number;
+  isArchived: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+**Card**
+```ts
+interface Card {
+  id: string;
+  columnId: string;
+  boardId: string;
+  title: string;
+  description?: string;
+  position: number;
+  dueDate?: Date;
+  isCompleted: boolean;
+  isArchived: boolean;
+  coverColor?: string;
+  coverAttachmentId?: string;
+  createdBy: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+**Label**
+```ts
+interface Label {
+  id: string;
+  boardId: string;
+  name: string;
+  color: string;
+  createdAt: Date;
+}
+```
+
+**CardLabel**
+```ts
+interface CardLabel {
+  id: string;
+  cardId: string;
+  labelId: string;
+  createdAt: Date;
+}
 ```

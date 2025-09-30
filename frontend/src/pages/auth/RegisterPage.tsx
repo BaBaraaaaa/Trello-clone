@@ -18,51 +18,43 @@ const RegisterPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [localError, setLocalError] = useState("");
+  // Redux auth state
+  const { register, isLoading, error: authError } = useAuth();
 
-  const { register } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-
+    setLocalError("");
     // Validation
     if (!name.trim()) {
-      setError("Vui lòng nhập tên");
+      setLocalError("Vui lòng nhập tên");
       return;
     }
 
     if (!email.trim()) {
-      setError("Vui lòng nhập email");
+      setLocalError("Vui lòng nhập email");
       return;
     }
 
     if (password.length < 6) {
-      setError("Mật khẩu phải có ít nhất 6 ký tự");
+      setLocalError("Mật khẩu phải có ít nhất 6 ký tự");
       return;
     }
 
     if (password !== confirmPassword) {
-      setError("Mật khẩu xác nhận không khớp");
+      setLocalError("Mật khẩu xác nhận không khớp");
       return;
     }
 
-    setIsLoading(true);
+  // Call Redux register
 
     try {
-      const success = await register(name, email, password);
-      
-      if (success) {
-        navigate("/");
-      } else {
-        setError("Có lỗi xảy ra khi đăng ký");
-      }
+      await register(name, email, password, name);
+      navigate("/");
     } catch {
-      setError("Có lỗi xảy ra khi đăng ký");
-    } finally {
-      setIsLoading(false);
+      // error from auth slice
     }
   };
 
@@ -102,9 +94,9 @@ const RegisterPage = () => {
               Đăng ký
             </Typography>
 
-            {error && (
+            {(localError || authError) && (
               <Alert severity="error" sx={{ mb: 2 }}>
-                {error}
+                {localError || authError}
               </Alert>
             )}
 

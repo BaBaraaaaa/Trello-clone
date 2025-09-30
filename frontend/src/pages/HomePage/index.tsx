@@ -22,7 +22,7 @@ import {
   Star as StarIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts';
+import { useAuth } from '../../hooks/useAuth';
 
 const HomePage: React.FC = () => {
   const theme = useTheme();

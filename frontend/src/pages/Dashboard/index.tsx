@@ -1,4 +1,11 @@
-import React, { useState, useCallback } from "react";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import React, { useCallback, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
+import { useGetBoardsQuery } from "../../services/api/apiSlice";
+import BoardCard from "./components/BoardCard";
+import CreateBoardModal from "./components/CreateBoardModal";
+import StatCard from "./components/StatCard";
 import {
   Box,
   Typography,
@@ -12,140 +19,50 @@ import {
 } from "@mui/material";
 import {
   Add as AddIcon,
-  Star as StarIcon,
-  StarBorder as StarBorderIcon,
-  Group as GroupIcon,
   Assignment as AssignmentIcon,
   CheckCircle as CheckCircleIcon,
   Schedule as ScheduleIcon,
   TrendingUp as TrendingUpIcon,
   Folder as FolderIcon,
+  Group as GroupIcon,
 } from "@mui/icons-material";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../contexts";
-import { useMockDB } from "../../contexts/MockDBContext";
-import CreateBoardModal from "./components/CreateBoardModal";
-import { BoardCard, StatCard } from "./components";
-
-// Mock data cho recent activity
-const recentActivities = [
-  {
-    id: "1",
-    user: "John Doe",
-    action: "completed",
-    item: "Login page design",
-    board: "Website Redesign",
-    time: "10 minutes ago",
-    avatar: "JD",
-  },
-  {
-    id: "2",
-    user: "Jane Smith",
-    action: "added",
-    item: "API integration task",
-    board: "Mobile App Development",
-    time: "1 hour ago",
-    avatar: "JS",
-  },
-  {
-    id: "3",
-    user: "Emily Davis",
-    action: "commented on",
-    item: "Social media strategy",
-    board: "Marketing Campaign",
-    time: "2 hours ago",
-    avatar: "ED",
-  },
-];
-
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  // state for create board modal
+  const { data: boards = [], isLoading, isError } = useGetBoardsQuery();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const handleCloseCreateModal = useCallback(() => setIsCreateModalOpen(false), []);
+  const handleCloseCreateModal = useCallback(
+    () => setIsCreateModalOpen(false),
+    []
+  );
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [selectedBoard, setSelectedBoard] = useState<string | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const recentActivities: any[] = [];
+
   const handleCreateBoard = useCallback((title: string) => {
     // TODO: replace with real create logic
     console.log("Create new board:", title);
     setIsCreateModalOpen(false);
   }, []);
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [selectedBoard, setSelectedBoard] = useState<string | null>(null);
-  const { db, getBoardMembers } = useMockDB();
-  const [boards, setBoards] = useState(() => {
-    // Map DB boards to UI boards used by BoardCard
-    return db.boards.map((b) => {
-      const members = getBoardMembers(b.id).map((m) => ({
-        id: m.id,
-        name: m.name,
-        avatar: m.initials,
-      }));
-      // naive progress stats from cards
-      const boardColumns = db.columns
-        .filter((c) => c.boardId === b.id)
-        .map((c) => c.id);
-      const boardCards = db.cards.filter((c) =>
-        boardColumns.includes(c.columnId)
-      );
-      const totalTasks = boardCards.length;
-      const completedTasks = boardCards.filter((c) => c.isCompleted).length;
-      const progress =
-        totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
-      return {
-        id: b.id,
-        title: b.title,
-        description: b.description ?? "",
-        background:
-          b.backgroundType === "color" ? b.backgroundValue : b.backgroundValue,
-        isStarred: db.boardMembers.some(
-          (bm) => bm.boardId === b.id && bm.isStarred
-        ),
-        members,
-        progress,
-        totalTasks,
-        completedTasks,
-        lastUpdated: b.updatedAt.toISOString().split("T")[0],
-      };
-    });
-  });
 
-  const handleMenuOpen = (
-    event: React.MouseEvent<HTMLElement>,
-    boardId: string
-  ) => {
-    setAnchorEl(event.currentTarget);
-    setSelectedBoard(boardId);
-  };
-
+  const handleBoardClick = useCallback(
+    (boardId: string) => {
+      navigate(`/board/${boardId}`);
+    },
+    [navigate]
+  );
   const handleMenuClose = () => {
     setAnchorEl(null);
     setSelectedBoard(null);
   };
-
-  const toggleStar = (boardId: string) => {
-    setBoards(
-      boards.map((board) =>
-        board.id === boardId ? { ...board, isStarred: !board.isStarred } : board
-      )
-    );
-    handleMenuClose();
-  };
-
-  const handleBoardClick = (boardId: string) => {
-    navigate(`/board/${boardId}`);
-  };
-
-  const createNewBoard = () => setIsCreateModalOpen(true);
-
-  // Statistics calculations
+  // Statistics
   const totalBoards = boards.length;
-  const totalTasks = boards.reduce((sum, board) => sum + board.totalTasks, 0);
-  const completedTasks = boards.reduce(
-    (sum, board) => sum + board.completedTasks,
-    0
-  );
-  const overallProgress =
-    totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
+
+  const totalTasks = 0; // Placeholder
+  const completedTasks = 0; // Placeholder
+  const overallProgress = totalBoards ? 0 : 0;
+  const createNewBoard = () => setIsCreateModalOpen(true);
 
   return (
     <Box
@@ -197,7 +114,7 @@ const Dashboard: React.FC = () => {
             WebkitTextFillColor: "transparent",
           }}
         >
-          Welcome back, {user?.name}! 👋
+          Welcome back, {user?.fullName}! 👋
         </Typography>
         <Typography
           variant="body1"
@@ -262,7 +179,6 @@ const Dashboard: React.FC = () => {
             color="info"
           />
         </Box>
-
         {/* Main Content Grid */}
         <Box
           sx={{
@@ -317,14 +233,38 @@ const Dashboard: React.FC = () => {
                 gap: { xs: 2, sm: 3 },
               }}
             >
-              {boards.map((board) => (
+              {boards.map((b) => (
                 <BoardCard
-                  key={board.id}
-                  board={board}
+                  key={b.id}
+                  board={{
+                    id: b.id,
+                    title: b.title,
+                    description: b.description ?? "",
+                    background: b.background.value,
+                    isStarred: false,
+                    members: [],
+                    progress: 0,
+                    totalTasks: 0,
+                    completedTasks: 0,
+                    lastUpdated: new Date(b.updatedAt)
+                      .toISOString()
+                      .split("T")[0],
+                  }}
                   onClick={handleBoardClick}
-                  onMenuClick={handleMenuOpen}
+                  onMenuClick={() => {}}
                 />
               ))}
+              {isLoading && (
+                <Typography>Loading boards...</Typography>
+              )}
+              {isError &&  (
+                <Typography color="error">
+                  Error loading boards. Please try again.
+                </Typography>
+              )}
+              {!isLoading && boards.length === 0 && (
+                <Typography>No boards found. Create your first board!</Typography>
+              )}
             </Box>
           </Box>
 
@@ -337,7 +277,7 @@ const Dashboard: React.FC = () => {
                   Recent Activity
                 </Typography>
                 <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                  {recentActivities.map((activity, index) => (
+                  {recentActivities.length > 0 && recentActivities.map((activity, index) => (
                     <Box key={activity.id}>
                       <Box
                         sx={{
@@ -420,19 +360,6 @@ const Dashboard: React.FC = () => {
           open={Boolean(anchorEl)}
           onClose={handleMenuClose}
         >
-          <MenuItem onClick={() => selectedBoard && toggleStar(selectedBoard)}>
-            {boards.find((b) => b.id === selectedBoard)?.isStarred ? (
-              <>
-                <StarBorderIcon sx={{ mr: 1 }} />
-                Remove from Starred
-              </>
-            ) : (
-              <>
-                <StarIcon sx={{ mr: 1 }} />
-                Add to Starred
-              </>
-            )}
-          </MenuItem>
           <MenuItem onClick={handleMenuClose}>
             <AssignmentIcon sx={{ mr: 1 }} />
             Board Settings

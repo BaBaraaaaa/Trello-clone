@@ -226,7 +226,7 @@ const CardDetailDialog: React.FC<CardDetailDialogProps> = ({
               {editedCard.labels.map((label, index) => (
                 <Chip
                   key={index}
-                  label={label.text}
+                  label={label.name}
                   size="small"
                   sx={{
                     backgroundColor: label.color,

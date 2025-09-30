@@ -30,8 +30,10 @@ export interface Board {
   id: string;
   title: string;
   description?: string;
-  backgroundType: 'color' | 'gradient' | 'image';
-  backgroundValue: string;
+  background: {
+    type: 'color' | 'gradient' | 'image';
+    value: string;
+  };
   visibility: 'private' | 'workspace' | 'public';
   isClosed: boolean;
   createdBy: string;
@@ -53,6 +55,7 @@ export interface Column {
 export interface Card {
   id: string;
   columnId: string;
+  boardId: string;
   title: string;
   description?: string;
   position: number;
