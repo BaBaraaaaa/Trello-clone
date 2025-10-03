@@ -30,12 +30,12 @@ const BoardPage: React.FC = () => {
   // RTK Query hooks
   const { data: board, isLoading: loadingBoard, error: boardError } = useGetBoardQuery(bid);
   const { data: columns = [], isLoading: loadingCols, error: colsError } = useGetColumnsQuery(bid);
-  const { data: labels = [] } = useGetLabelsQuery(bid);
+  const { data: labels = [], isLoading: loadingLabels, error: labelsError } = useGetLabelsQuery(bid);
   // Board members
-  const boardMembersQuery = useGetBoardMembersQuery(bid);
-  const members: MemberResponse[] = boardMembersQuery.data ?? [];
-  const [addMember] = useAddBoardMemberMutation();
-  const [removeMember] = useDeleteBoardMemberMutation();
+  const { data: members = [], isLoading: loadingMembers, error: membersError } = useGetBoardMembersQuery(bid);
+
+   const [addMember] = useAddBoardMemberMutation();
+   const [removeMember] = useDeleteBoardMemberMutation();
 
   const [selectedCard, setSelectedCard] = useState<CardItemData | null>(null);
   const [isCardDetailOpen, setIsCardDetailOpen] = useState(false);
@@ -70,8 +70,10 @@ const BoardPage: React.FC = () => {
     );
   };
 
-  if (loadingBoard || loadingCols) return <Typography>Loading...</Typography>;
-  if (boardError || colsError || !board) return <Typography>Error loading board</Typography>;
+  if (loadingBoard || loadingCols || loadingLabels || loadingMembers)
+    return <Typography>Loading board...</Typography>;
+  if (boardError || colsError || labelsError || membersError || !board)
+    return <Typography>Error loading board data</Typography>;
 
   return (
     <Box

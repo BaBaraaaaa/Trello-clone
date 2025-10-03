@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { useGetBoardsQuery } from "../../services/api/apiSlice";
@@ -46,16 +46,15 @@ const Dashboard: React.FC = () => {
     setIsCreateModalOpen(false);
   }, []);
 
-  const handleBoardClick = useCallback(
-    (boardId: string) => {
-      navigate(`/board/${boardId}`);
-    },
-    [navigate]
-  );
+  const handleBoardClick = useCallback((boardId: string) => {
+    console.log("Board clicked:", boardId);
+    navigate(`/board/${boardId}`);
+  }, [navigate]);
   const handleMenuClose = () => {
     setAnchorEl(null);
     setSelectedBoard(null);
   };
+
   // Statistics
   const totalBoards = boards.length;
 
@@ -233,11 +232,11 @@ const Dashboard: React.FC = () => {
                 gap: { xs: 2, sm: 3 },
               }}
             >
-              {boards.map((b) => (
+              {boards.map((b, idx) => (
                 <BoardCard
-                  key={b.id}
+                  key={idx}
                   board={{
-                    id: b.id,
+                    _id: b.id,
                     title: b.title,
                     description: b.description ?? "",
                     background: b.background.value,
@@ -254,16 +253,16 @@ const Dashboard: React.FC = () => {
                   onMenuClick={() => {}}
                 />
               ))}
-              {isLoading && (
-                <Typography>Loading boards...</Typography>
-              )}
-              {isError &&  (
+              {isLoading && <Typography>Loading boards...</Typography>}
+              {isError && (
                 <Typography color="error">
                   Error loading boards. Please try again.
                 </Typography>
               )}
               {!isLoading && boards.length === 0 && (
-                <Typography>No boards found. Create your first board!</Typography>
+                <Typography>
+                  No boards found. Create your first board!
+                </Typography>
               )}
             </Box>
           </Box>
@@ -277,41 +276,45 @@ const Dashboard: React.FC = () => {
                   Recent Activity
                 </Typography>
                 <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                  {recentActivities.length > 0 && recentActivities.map((activity, index) => (
-                    <Box key={activity.id}>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          alignItems: "flex-start",
-                          gap: 2,
-                        }}
-                      >
-                        <Avatar
+                  {recentActivities.length > 0 &&
+                    recentActivities.map((activity, index) => (
+                      <Box key={activity.id}>
+                        <Box
                           sx={{
-                            width: 32,
-                            height: 32,
-                            fontSize: "0.8rem",
-                            bgcolor: "primary.main",
+                            display: "flex",
+                            alignItems: "flex-start",
+                            gap: 2,
                           }}
                         >
-                          {activity.avatar}
-                        </Avatar>
-                        <Box sx={{ flex: 1 }}>
-                          <Typography variant="body2">
-                            <strong>{activity.user}</strong> {activity.action}{" "}
-                            <em>{activity.item}</em> in{" "}
-                            <strong>{activity.board}</strong>
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            {activity.time}
-                          </Typography>
+                          <Avatar
+                            sx={{
+                              width: 32,
+                              height: 32,
+                              fontSize: "0.8rem",
+                              bgcolor: "primary.main",
+                            }}
+                          >
+                            {activity.avatar}
+                          </Avatar>
+                          <Box sx={{ flex: 1 }}>
+                            <Typography variant="body2">
+                              <strong>{activity.user}</strong> {activity.action}{" "}
+                              <em>{activity.item}</em> in{" "}
+                              <strong>{activity.board}</strong>
+                            </Typography>
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                            >
+                              {activity.time}
+                            </Typography>
+                          </Box>
                         </Box>
+                        {index < recentActivities.length - 1 && (
+                          <Divider sx={{ my: 2 }} />
+                        )}
                       </Box>
-                      {index < recentActivities.length - 1 && (
-                        <Divider sx={{ my: 2 }} />
-                      )}
-                    </Box>
-                  ))}
+                    ))}
                 </Box>
               </CardContent>
             </Card>

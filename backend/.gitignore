@@ -27,3 +27,4 @@ build/
 # Coverage
 coverage/
 .nyc_output/
+yarn.lock

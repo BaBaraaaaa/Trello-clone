@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { axiosBaseQuery } from '../axiosBaseQuery';
 import type { Board, Column, Card, Label, CardLabel } from '../../types/database';
@@ -24,6 +25,14 @@ export const api = createApi({
     // Boards endpoints
     getBoards: build.query<Board[], void>({
       query: () => ({ url: '/boards', method: 'GET' }),
+      transformResponse: (response: unknown): Board[] => {
+        if (Array.isArray(response)) {
+          // Map backend `_id` to `id`
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          return (response as any[]).map((b: any) => ({ ...b, id: b._id }));
+        }
+        return [];
+      },
       providesTags: (result) =>
         result
           ? [
@@ -34,6 +43,8 @@ export const api = createApi({
     }),
     getBoard: build.query<Board, string>({
       query: (id) => ({ url: `/boards/${id}`, method: 'GET' }),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      transformResponse: (response: any): Board => ({ ...response, id: response._id }),
       providesTags: (_result, _error, id) => [{ type: 'Board', id }],
     }),
     addBoard: build.mutation<Board, Partial<Board>>({
@@ -52,7 +63,9 @@ export const api = createApi({
     // Columns endpoints
     getColumns: build.query<Column[], string>({
       query: (boardId) => ({ url: `/columns/board/${boardId}`, method: 'GET' }),
-  providesTags: (result, _error, boardId) =>
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      transformResponse: (response: any[]): Column[] => response.map(col => ({ ...col, id: col._id })),
+      providesTags: (result, _error, boardId) =>
         result
           ? [
               ...result.map(({ id }) => ({ type: 'Column' as const, id })),
@@ -77,7 +90,9 @@ export const api = createApi({
     // Cards endpoints
     getCards: build.query<Card[], string>({
       query: (columnId) => ({ url: `/cards/column/${columnId}`, method: 'GET' }),
-  providesTags: (result, _error, columnId) =>
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      transformResponse: (response: any[]): Card[] => response.map(card => ({ ...card, id: card._id })),
+      providesTags: (result, _error, columnId) =>
         result
           ? [
               ...result.map(({ id }) => ({ type: 'Card' as const, id })),
@@ -102,7 +117,9 @@ export const api = createApi({
     // Labels endpoints
     getLabels: build.query<Label[], string>({
       query: (boardId) => ({ url: `/labels/board/${boardId}`, method: 'GET' }),
-  providesTags: (result, _error, boardId) =>
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      transformResponse: (response: any[]): Label[] => response.map(label => ({ ...label, id: label._id })),
+      providesTags: (result, _error, boardId) =>
         result
           ? [
               ...result.map(({ id }) => ({ type: 'Label' as const, id })),
@@ -147,7 +164,9 @@ export const api = createApi({
     // BoardMembers endpoints
   getBoardMembers: build.query<BoardMemberResponse[], string>({
       query: (boardId) => ({ url: `/board-members/board/${boardId}`, method: 'GET' }),
-  providesTags: (result, _error, boardId) =>
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      transformResponse: (response: any[]): BoardMemberResponse[] => response.map(m => ({ ...m, id: m._id })),
+      providesTags: (result, _error, boardId) =>
         result
           ? [
               ...result.map(({ id }) => ({ type: 'BoardMember' as const, id })),

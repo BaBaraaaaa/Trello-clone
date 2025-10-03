@@ -23,7 +23,7 @@ export interface BoardMember {
 }
 
 export interface Board {
-  id: string;
+  _id: string;
   title: string;
   description: string;
   background: string;
@@ -43,7 +43,7 @@ interface BoardCardProps {
 
 const BoardCard: React.FC<BoardCardProps> = ({ board, onClick, onMenuClick }) => {
   const theme = useTheme();
-
+  console.log(board);
   return (
     <Card
       sx={{
@@ -56,7 +56,7 @@ const BoardCard: React.FC<BoardCardProps> = ({ board, onClick, onMenuClick }) =>
         },
         transition: 'all 0.3s ease',
       }}
-      onClick={() => onClick(board.id)}
+      onClick={() => onClick(board._id)}
     >
       <Box
         sx={{
@@ -92,7 +92,7 @@ const BoardCard: React.FC<BoardCardProps> = ({ board, onClick, onMenuClick }) =>
           }}
           onClick={(e) => {
             e.stopPropagation();
-            onMenuClick(e, board.id);
+            onMenuClick(e, board._id);
           }}
         >
           <MoreVertIcon />
