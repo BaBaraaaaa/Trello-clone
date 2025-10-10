@@ -86,6 +86,7 @@ const CardDetailDialog: React.FC<CardDetailDialogProps> = ({
   const { data: cardLabels = [], isLoading: loadingCardLabels } = useGetCardLabelsQuery(card?.id ?? '', { skip: !card });
   const [assignLabel] = useAddCardLabelMutation();
   const [unassignLabel] = useDeleteCardLabelMutation();
+  const [updateChecklistItem] = useUpdateChecklistItemMutation();
   // New Label Dialog state
   const [createLabelDialogOpen, setCreateLabelDialogOpen] = useState(false);
   const [newLabelNameDialog, setNewLabelNameDialog] = useState('');

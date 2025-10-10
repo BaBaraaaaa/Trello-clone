@@ -28,6 +28,7 @@ import {
   useDeleteCardMutation,
   useDeleteColumnMutation,
 } from "../../services/api/apiSlice";
+// import CreateColumns removed; use BoardColumns internal CreateColumns
 
 const BoardPage: React.FC = () => {
   const { boardId } = useParams<{ boardId: string }>();
@@ -68,6 +69,7 @@ const BoardPage: React.FC = () => {
   const [selectedCard, setSelectedCard] = useState<CardItemData | null>(null);
   const [isCardDetailOpen, setIsCardDetailOpen] = useState(false);
 
+  // removed createColumns state
   // Column component that fetches cards via RTK Query
   const ColumnWithCards: React.FC<{ col: (typeof columns)[number] }> = ({
     col,
@@ -202,14 +204,7 @@ const BoardPage: React.FC = () => {
       />
 
       {/* Board Columns */}
-      <BoardColumns
-        onAddColumn={() => {
-          const title = window.prompt("Enter new column title:");
-          if (title) {
-            addColumn({ boardId: bid, title });
-          }
-        }}
-      >
+      <BoardColumns onAddColumn={(title) => addColumn({ boardId: bid, title })}>
         {columns.map((col) => (
           <ColumnWithCards key={col.id} col={col} />
         ))}

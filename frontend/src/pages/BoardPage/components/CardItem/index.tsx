@@ -54,7 +54,7 @@ const CardItem: React.FC<CardItemProps> = ({
 
   const isOverdue = card.dueDate && new Date(card.dueDate) < new Date();
   const isDueToday = card.dueDate && new Date(card.dueDate).toDateString() === new Date().toDateString();
-  console.log(card);
+  console.log(card.title);
   return (
     <Card
       className="card-container"
