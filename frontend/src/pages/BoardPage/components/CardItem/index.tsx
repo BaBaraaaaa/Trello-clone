@@ -54,7 +54,7 @@ const CardItem: React.FC<CardItemProps> = ({
 
   const isOverdue = card.dueDate && new Date(card.dueDate) < new Date();
   const isDueToday = card.dueDate && new Date(card.dueDate).toDateString() === new Date().toDateString();
-
+  console.log(card);
   return (
     <Card
       className="card-container"
@@ -230,7 +230,6 @@ const CardItem: React.FC<CardItemProps> = ({
 
       {/* Card Actions */}
       <CardActions
-        cardId={card.id}
         cardTitle={card.title}
         onEdit={() => onEdit?.(card)}
         onCopy={() => onCopy?.(card)}

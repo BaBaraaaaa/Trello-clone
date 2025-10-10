@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   IconButton,
@@ -18,13 +18,10 @@ import {
   Archive as ArchiveIcon,
   Delete as DeleteIcon,
   ArrowForward as MoveIcon,
-  Label as LabelIcon,
 } from '@mui/icons-material';
-import { useParams } from 'react-router-dom';
-import { useMockDB } from '../../../../../contexts/MockDBContext';
+// Removed mock DB, using props callbacks
 
-  export interface CardActionsProps {
-    cardId: string;
+export interface CardActionsProps {
     cardTitle: string;
     onEdit?: () => void;
     onCopy?: () => void;
@@ -34,19 +31,10 @@ import { useMockDB } from '../../../../../contexts/MockDBContext';
     size?: 'small' | 'medium';
   }
 
-  const CardActions: React.FC<CardActionsProps> = ({ cardId, cardTitle, onEdit, onCopy, onMove, onArchive, onDelete, size = 'small' }) => {
+const CardActions: React.FC<CardActionsProps> = ({ cardTitle, onEdit, onCopy, onMove, onArchive, onDelete, size = 'small' }) => {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-    const [labelsDialogOpen, setLabelsDialogOpen] = useState(false);
-    const { boardId } = useParams<{ boardId: string }>();
-    const { getBoardLabels, toggleCardLabel, db } = useMockDB();
-
-    const allLabels = useMemo(
-      () => (boardId ? getBoardLabels(boardId) : []),
-      [boardId, getBoardLabels]
-    );
-
-    const isLabelActive = (labelId: string) => db.cardLabels.some(cl => cl.cardId === cardId && cl.labelId === labelId);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    // Props: onEdit, onCopy, onMove, onArchive, onDelete
 
     const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
       event.stopPropagation();
@@ -78,14 +66,6 @@ import { useMockDB } from '../../../../../contexts/MockDBContext';
       }
     };
 
-    const handleOpenLabels = () => {
-      handleMenuClose();
-      setLabelsDialogOpen(true);
-    };
-
-    const toggleLabel = (labelId: string) => {
-      toggleCardLabel(cardId, labelId);
-    };
 
     return (
       <>
@@ -137,10 +117,7 @@ import { useMockDB } from '../../../../../contexts/MockDBContext';
             <ContentCopyIcon sx={{ mr: 1, fontSize: '1rem' }} />
             Copy Card
           </MenuItem>
-          <MenuItem onClick={(e) => { e.stopPropagation(); handleOpenLabels(); }}>
-            <LabelIcon sx={{ mr: 1, fontSize: '1rem' }} />
-            Labels
-          </MenuItem>
+          {/* Removed labels menu */}
           <MenuItem onClick={(e) => { e.stopPropagation(); handleAction('move'); }}>
             <MoveIcon sx={{ mr: 1, fontSize: '1rem' }} />
             Move Card
@@ -175,46 +152,6 @@ import { useMockDB } from '../../../../../contexts/MockDBContext';
           </DialogActions>
         </Dialog>
 
-        <Dialog
-          open={labelsDialogOpen}
-          onClose={() => setLabelsDialogOpen(false)}
-          onClick={(e) => e.stopPropagation()}
-          PaperProps={{ sx: { borderRadius: 3, minWidth: 360 } }}
-        >
-          <DialogTitle>Card Labels</DialogTitle>
-          <DialogContent dividers>
-            {allLabels.length === 0 ? (
-              <Typography color="text.secondary">No labels on this board.</Typography>
-            ) : (
-              <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1.5 }}>
-                {allLabels.map(l => {
-                  const active = isLabelActive(l.id);
-                  return (
-                    <Button
-                      key={l.id}
-                      variant={active ? 'contained' : 'outlined'}
-                      onClick={(e) => { e.stopPropagation(); toggleLabel(l.id); }}
-                      sx={{
-                        justifyContent: 'flex-start',
-                        textTransform: 'none',
-                        borderRadius: 2,
-                        ...(active
-                          ? { bgcolor: l.color, color: '#fff', '&:hover': { bgcolor: l.color } }
-                          : { borderColor: 'divider', color: 'text.primary' }),
-                      }}
-                    >
-                      <Box sx={{ width: 12, height: 12, borderRadius: '3px', bgcolor: l.color, mr: 1 }} />
-                      {l.name}
-                    </Button>
-                  );
-                })}
-              </Box>
-            )}
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setLabelsDialogOpen(false)}>Close</Button>
-          </DialogActions>
-        </Dialog>
       </>
     );
   };

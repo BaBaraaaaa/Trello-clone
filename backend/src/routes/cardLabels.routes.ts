@@ -1,6 +1,7 @@
 import { Router, Request, Response } from "express";
 import { body, param } from "express-validator";
 import CardLabel from "../models/cardLabel.model";
+import Card from "../models/card.model";
 import Label from "../models/label.model";
 import { authenticate } from "../middleware/auth.middleware";
 import { validateRequest } from "../middleware/validateRequest";
@@ -56,7 +57,6 @@ router.use(authenticate);
  *       404:
  *         description: Assignment not found
  */
-// Unassign a label from a card by cardId and labelId
 router.delete(
   '/card/:cardId/label/:labelId',
   [
@@ -70,6 +70,30 @@ router.delete(
       const result = await CardLabel.findOneAndDelete({ cardId, labelId });
       if (!result) return res.status(404).json({ message: 'Assignment not found' });
       res.json({ message: 'Label unassigned from card' });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: 'Server error' });
+    }
+  }
+);
+/**
+ * GET labels assigned to a card with details
+ */
+router.get(
+  '/card/:cardId',
+  [param('cardId').isMongoId().withMessage('Invalid card ID'), validateRequest],
+  async (req: Request, res: Response) => {
+    const { cardId } = req.params;
+    try {
+      const cardExists = await Card.findById(cardId);
+      if (!cardExists) return res.status(404).json({ message: 'Card not found', cardExists });
+      const assignments = await CardLabel.find({ cardId }).populate('labelId');
+      const labels = assignments.map(a => {
+        // a.labelId from populate
+        const lbl: any = a.labelId;
+        return { id: lbl._id, name: lbl.name, color: lbl.color };
+      });
+      res.json(labels);
     } catch (err) {
       console.error(err);
       res.status(500).json({ message: 'Server error' });
@@ -120,9 +144,9 @@ router.post(
       const label = await Label.findById(labelId);
       if (!label) return res.status(404).json({ message: "Label not found" });
       // check card exists
-      const cardExists = await CardLabel.findOne({ cardId, labelId });
+      const cardExists = await Card.findById(cardId);
       if (!cardExists)
-        return res.status(404).json({ message: "Card not found" });
+        return res.status(404).json({ message: "Card not found", cardExists });
       const assignment = new CardLabel({ cardId, labelId });
       const saved = await assignment.save();
       res.status(201).json(saved);

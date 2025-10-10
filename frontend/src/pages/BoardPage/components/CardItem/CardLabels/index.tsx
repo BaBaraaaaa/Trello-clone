@@ -31,9 +31,9 @@ const CardLabels: React.FC<CardLabelsProps> = ({
       }}
     >
       {visibleLabels.map((label, index) => (
-        <Tooltip key={label.id || index} title={label.text} arrow>
+        <Tooltip key={label.id || index} title={label.name} arrow>
           <Chip
-            label={label.text}
+            label={label.name}
             size={size}
             sx={{
               backgroundColor: label.color,

@@ -112,14 +112,10 @@ export interface Checklist {
 
 export interface ChecklistItem {
   id: string;
-  checklistId: string;
-  content: string;
-  isCompleted: boolean;
+  cardId: string;
+  text: string;
+  completed: boolean;
   position: number;
-  dueDate?: Date;
-  assignedTo?: string;
-  completedAt?: Date;
-  completedBy?: string;
   createdAt: Date;
   updatedAt: Date;
 }

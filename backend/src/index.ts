@@ -49,6 +49,9 @@ app.use("/api/card-labels", cardLabelsRoutes);
 // BoardMembers routes
 import boardMembersRoutes from "./routes/boardMembers.routes";
 app.use("/api/board-members", boardMembersRoutes);
+// Checklist item routes
+import checklistsRoutes from "./routes/checklists.routes";
+app.use("/api/checklists", checklistsRoutes);
 
 // // Swagger setup
 const swaggerOptions = {

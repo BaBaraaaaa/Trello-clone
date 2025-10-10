@@ -13,37 +13,71 @@ type MemberResponse = {
   id: string;
   userId: { fullName: string; avatarUrl?: string; initials: string };
 };
-import { useGetBoardQuery,
+import {
+  useGetBoardQuery,
   useGetColumnsQuery,
   useGetLabelsQuery,
   useGetCardsQuery,
   useGetBoardMembersQuery,
   useAddBoardMemberMutation,
-  useDeleteBoardMemberMutation
+  useDeleteBoardMemberMutation,
+  useAddColumnMutation,
+  useUpdateColumnMutation,
+  useAddCardMutation,
+  useUpdateCardMutation,
+  useDeleteCardMutation,
+  useDeleteColumnMutation,
 } from "../../services/api/apiSlice";
-
 
 const BoardPage: React.FC = () => {
   const { boardId } = useParams<{ boardId: string }>();
   const bid = boardId!;
 
   // RTK Query hooks
-  const { data: board, isLoading: loadingBoard, error: boardError } = useGetBoardQuery(bid);
-  const { data: columns = [], isLoading: loadingCols, error: colsError } = useGetColumnsQuery(bid);
-  const { data: labels = [], isLoading: loadingLabels, error: labelsError } = useGetLabelsQuery(bid);
+  const {
+    data: board,
+    isLoading: loadingBoard,
+    error: boardError,
+  } = useGetBoardQuery(bid);
+  const {
+    data: columns = [],
+    isLoading: loadingCols,
+    error: colsError,
+  } = useGetColumnsQuery(bid);
+  const {
+    data: labels = [],
+    isLoading: loadingLabels,
+    error: labelsError,
+  } = useGetLabelsQuery(bid);
   // Board members
-  const { data: members = [], isLoading: loadingMembers, error: membersError } = useGetBoardMembersQuery(bid);
+  const {
+    data: members = [],
+    isLoading: loadingMembers,
+    error: membersError,
+  } = useGetBoardMembersQuery(bid);
 
-   const [addMember] = useAddBoardMemberMutation();
-   const [removeMember] = useDeleteBoardMemberMutation();
+  const [addMember] = useAddBoardMemberMutation();
+  const [removeMember] = useDeleteBoardMemberMutation();
+  const [addColumn] = useAddColumnMutation();
+  const [updateColumn] = useUpdateColumnMutation();
+  const [addCard] = useAddCardMutation();
+  const [updateCard] = useUpdateCardMutation();
+  const [deleteCard] = useDeleteCardMutation();
+  const [deleteColumn] = useDeleteColumnMutation();
 
   const [selectedCard, setSelectedCard] = useState<CardItemData | null>(null);
   const [isCardDetailOpen, setIsCardDetailOpen] = useState(false);
 
   // Column component that fetches cards via RTK Query
-  const ColumnWithCards: React.FC<{ col: typeof columns[number] }> = ({ col }) => {
-    const { data: rawCards = [], isLoading: loadingCards, error: cardsError } = useGetCardsQuery(col.id);
-    const cards = rawCards.map(card => ({
+  const ColumnWithCards: React.FC<{ col: (typeof columns)[number] }> = ({
+    col,
+  }) => {
+    const {
+      data: rawCards = [],
+      isLoading: loadingCards,
+      error: cardsError,
+    } = useGetCardsQuery(col.id);
+    const cards = rawCards.map((card) => ({
       id: card.id,
       title: card.title,
       description: card.description,
@@ -53,19 +87,64 @@ const BoardPage: React.FC = () => {
     }));
     if (loadingCards) return <Typography>Loading cards...</Typography>;
     if (cardsError) return <Typography>Error loading cards</Typography>;
+    const handleChangeTitle = (columnId: string, newTitle: string) => {
+      if (!newTitle.trim()) {
+        return console.warn("Column title cannot be empty.");
+      }
+      try {
+        updateColumn({
+          id: columnId,
+          data: { title: newTitle.trim() },
+        }).unwrap();
+      } catch (error) {
+        console.error("Update column failed", error);
+      }
+    };
     return (
       <Column
         id={col.id}
         title={col.title}
         cards={cards}
-        onAddCard={() => console.log("Add card to", col.id)}
-        onCardClick={(card) => { setSelectedCard(card); setIsCardDetailOpen(true); }}
-        onCardEdit={(card) => console.log("Edit card", card)}
-        onCardCopy={(card) => console.log("Copy card", card)}
-        onCardMove={(card) => console.log("Move card", card)}
-        onCardArchive={(card) => console.log("Archive card", card)}
-        onCardDelete={(card) => console.log("Delete card", card)}
-        onTitleChange={(id, title) => console.log("Column title change", id, title)}
+        // Card actions
+        onAddCard={(columnId, title) =>
+          addCard({ columnId, boardId: bid, title })
+        }
+        onCardClick={(card) => {
+          setSelectedCard(card);
+          setIsCardDetailOpen(true);
+        }}
+        onCardEdit={(card) => {
+          const newTitle = window.prompt("Edit card title", card.title);
+          if (newTitle && newTitle.trim())
+            updateCard({
+              id: card.id,
+              data: { title: newTitle.trim(), description: card.description },
+            });
+        }}
+        onCardCopy={(card) =>
+          addCard({
+            columnId: col.id,
+            boardId: bid,
+            title: card.title + " (Copy)",
+          })
+        }
+        onCardMove={(card) => {
+          const target = window.prompt("Enter target column ID to move card:");
+          if (target) updateCard({ id: card.id, data: { columnId: target } });
+        }}
+        onCardArchive={(card) =>
+          updateCard({ id: card.id, data: { isArchived: true } })
+        }
+        onCardDelete={(card) => deleteCard(card.id)}
+        // Column actions
+        onTitleChange={handleChangeTitle}
+        onCopyColumn={() =>
+          addColumn({ boardId: bid, title: col.title + " (Copy)" })
+        }
+        onArchiveColumn={() =>
+          updateColumn({ id: col.id, data: { isArchived: true } })
+        }
+        onDeleteColumn={() => deleteColumn(col.id)}
       />
     );
   };
@@ -74,7 +153,16 @@ const BoardPage: React.FC = () => {
     return <Typography>Loading board...</Typography>;
   if (boardError || colsError || labelsError || membersError || !board)
     return <Typography>Error loading board data</Typography>;
+  const handleCardSave = (card: CardItemData) => {
+    // To implement: Save card changes
+    console.log(card);
+    try{
+    updateCard({ id: card.id, data: { title: card?.title, description: card?.description } });
 
+    } catch (error) {
+    console.error("Update card failed", error);
+    }
+  }
   return (
     <Box
       sx={{
@@ -90,7 +178,7 @@ const BoardPage: React.FC = () => {
       }}
     >
       {/* Board Header */}
-  <BoardHeader
+      <BoardHeader
         title={board.title}
         description={board.description || ""}
         members={members.map((m: MemberResponse) => ({
@@ -106,24 +194,40 @@ const BoardPage: React.FC = () => {
         onRemoveMember={(id) => removeMember(id)}
         onFilter={(filters) => console.log("Filter", filters)}
         onBoardAction={(action) => console.log("Board action", action)}
-        availableLabels={labels.map((l) => ({ id: l.id, name: l.name, color: l.color }))}
+        availableLabels={labels.map((l) => ({
+          id: l.id,
+          name: l.name,
+          color: l.color,
+        }))}
       />
 
       {/* Board Columns */}
-      <BoardColumns onAddColumn={() => console.log("Add column")}>   
-        {columns.map(col => (
+      <BoardColumns
+        onAddColumn={() => {
+          const title = window.prompt("Enter new column title:");
+          if (title) {
+            addColumn({ boardId: bid, title });
+          }
+        }}
+      >
+        {columns.map((col) => (
           <ColumnWithCards key={col.id} col={col} />
         ))}
       </BoardColumns>
 
       {/* Card Detail Dialog */}
       <CardDetailDialog
+        boardId={bid}
         open={isCardDetailOpen}
         card={selectedCard}
         onClose={() => setIsCardDetailOpen(false)}
-        onSave={(card) => console.log("Save card", card)}
+        onSave={handleCardSave}
         boardMembers={[]} // To implement
-        availableLabels={labels.map((l) => ({ id: l.id, name: l.name, color: l.color }))}
+        availableLabels={labels.map((l) => ({
+          id: l.id,
+          name: l.name,
+          color: l.color,
+        }))}
       />
     </Box>
   );
